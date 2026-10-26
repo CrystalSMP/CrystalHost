@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrystalHost</title>
+<meta name="description" content="Kostenlos einen Minecraft-Server auf deinem eigenen PC hosten – mit professionellem Web-Panel, Dateimanager, Plugins und Zugangscodes für deine Freunde.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 9v14L16 30 4 23V9z' fill='%238b5cf6'/%3E%3Cpath d='M16 8l6 4v8l-6 4-6-4v-8z' fill='%23c4b5fd'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080c; --bg-2: #0d0f16; --card: #11141d; --card-2: #171b27; --line: #222838;
+    --fg: #eef0f6; --muted: #8b93a7; --accent: #8b5cf6; --accent-2: #a78bfa; --blue: #3b82f6; --green: #22c55e; --yellow: #eab308;
+    --grad: linear-gradient(120deg, #8b5cf6, #3b82f6);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(900px 600px at 15% -10%, rgba(139,92,246,.2), transparent 60%), radial-gradient(800px 600px at 100% 20%, rgba(59,130,246,.13), transparent 60%); }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  .i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  header { position: sticky; top: 0; z-index: 20; background: rgba(7,8,12,.7); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: center; gap: 24px; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -.01em; }
+  .logo svg { width: 30px; height: 30px; }
+  .logo span { color: var(--accent-2); }
+  nav { margin-left: auto; display: flex; gap: 22px; font-size: 14.5px; font-weight: 500; color: var(--muted); }
+  nav a:hover { color: var(--fg); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 700; border-radius: 12px; padding: 12px 20px; border: 1px solid transparent; cursor: pointer; transition: transform .15s, box-shadow .2s, background .2s; font-size: 15px; }
+  .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 10px 30px rgba(139,92,246,.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(139,92,246,.5); }
+  .btn-ghost { background: rgba(255,255,255,.04); border-color: var(--line); color: var(--fg); }
+  .btn-ghost:hover { background: rgba(255,255,255,.08); }
+  .btn-sm { padding: 8px 14px; font-size: 14px; border-radius: 10px; }
+
+  .hero { padding: 84px 0 60px; text-align: center; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(139,92,246,.12); border: 1px solid rgba(139,92,246,.35); color: #ddd6fe; font-size: 13.5px; font-weight: 600; }
+  .pill b { color: var(--green); }
+  h1 { font-size: clamp(38px, 7vw, 74px); line-height: 1.02; letter-spacing: -.03em; font-weight: 900; margin: 22px auto 18px; max-width: 900px; }
+  h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .lead { color: var(--muted); font-size: clamp(17px, 2.2vw, 20px); max-width: 640px; margin: 0 auto 32px; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .note { margin-top: 14px; color: var(--muted); font-size: 13px; }
+
+  .mock { margin: 56px auto 0; max-width: 980px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(139,92,246,.08); overflow: hidden; text-align: left; }
+  .mock-bar { display: flex; gap: 7px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+  .mock-bar i { width: 11px; height: 11px; border-radius: 50%; background: #2b3142; }
+  .mock-bar em { margin-left: 10px; font: 500 12px "JetBrains Mono", monospace; color: var(--muted); font-style: normal; }
+  .mock-body { display: grid; grid-template-columns: 190px 1fr; min-height: 330px; }
+  .mock-side { border-right: 1px solid var(--line); padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); background: var(--bg-2); }
+  .mock-side div { padding: 7px 10px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+  .mock-side .on { background: rgba(139,92,246,.15); color: #fff; }
+  .mock-main { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .mock-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mock-head b { font-size: 20px; }
+  .ok { font-size: 11px; font-weight: 800; color: var(--green); border: 1px solid rgba(34,197,94,.4); background: rgba(34,197,94,.1); padding: 2px 9px; border-radius: 999px; }
+  .mock-btns { margin-left: auto; display: flex; gap: 6px; }
+  .mock-btns span { font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 8px; background: var(--card-2); border: 1px solid var(--line); }
+  .mock-btns span:first-child { background: var(--green); color: #04210f; border-color: transparent; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stat { background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .stat small { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .stat b { display: block; font-size: 20px; margin: 2px 0 8px; }
+  .bar { height: 5px; border-radius: 9px; background: #1d2230; overflow: hidden; } .bar span { display: block; height: 100%; background: var(--grad); border-radius: 9px; }
+  .term { background: #05060a; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font: 500 12px/1.7 "JetBrains Mono", monospace; color: #9aa4b8; flex: 1; }
+  .term .g { color: var(--green); } .term .p { color: var(--accent-2); }
+
+  section { padding: 90px 0 0; }
+  .eyebrow { color: var(--accent-2); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: center; }
+  h2 { font-size: clamp(30px, 4.5vw, 44px); letter-spacing: -.02em; font-weight: 800; text-align: center; margin: 8px 0 14px; line-height: 1.1; }
+  .sub { text-align: center; color: var(--muted); max-width: 620px; margin: 0 auto 44px; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+  .step { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px 22px 22px; }
+  .step::before { counter-increment: s; content: counter(s); position: absolute; top: -16px; left: 22px; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--grad); font-weight: 800; box-shadow: 0 8px 20px rgba(139,92,246,.4); }
+  .step h3 { margin: 6px 0 6px; font-size: 18px; }
+  .step p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; transition: border-color .2s, transform .2s; }
+  .feat:hover { border-color: rgba(139,92,246,.45); transform: translateY(-3px); }
+  .feat .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: rgba(139,92,246,.14); color: var(--accent-2); margin-bottom: 14px; }
+  .feat .ic .i { width: 21px; height: 21px; }
+  .feat h3 { margin: 0 0 6px; font-size: 17px; }
+  .feat p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; max-width: 860px; margin: 0 auto; }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; display: flex; flex-direction: column; }
+  .plan.free { border-color: rgba(139,92,246,.5); box-shadow: 0 0 60px rgba(139,92,246,.12); }
+  .plan .tag { align-self: flex-start; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: rgba(34,197,94,.14); color: var(--green); margin-bottom: 12px; }
+  .plan.pro .tag { background: rgba(234,179,8,.14); color: var(--yellow); }
+  .plan h3 { margin: 0; font-size: 22px; }
+  .price { font-size: 40px; font-weight: 900; letter-spacing: -.02em; margin: 8px 0 4px; }
+  .price small { font-size: 15px; color: var(--muted); font-weight: 500; }
+  .plan ul { list-style: none; padding: 0; margin: 16px 0 24px; flex: 1; }
+  .plan li { display: flex; gap: 10px; padding: 7px 0; font-size: 14.5px; border-bottom: 1px solid rgba(255,255,255,.04); }
+  .plan li .i { color: var(--green); margin-top: 3px; }
+  .plan.pro li .i { color: var(--yellow); }
+  .plan .btn { width: 100%; }
+  .soon { opacity: .6; cursor: not-allowed; }
+
+  .faq { max-width: 760px; margin: 0 auto; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; }
+  details[open] { border-color: rgba(139,92,246,.4); }
+  summary { cursor: pointer; list-style: none; padding: 16px 18px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--accent-2); font-size: 22px; line-height: 1; transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 15px; }
+
+  .final { margin-top: 90px; text-align: center; padding: 56px 20px; border-radius: 26px; border: 1px solid rgba(139,92,246,.4); background: radial-gradient(600px 300px at 50% 0%, rgba(139,92,246,.25), transparent 70%), var(--card); }
+  .final h2 { margin-top: 0; }
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
+  .foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  code { font-family: "JetBrains Mono", monospace; font-size: .9em; background: rgba(139,92,246,.14); color: #ddd6fe; padding: 1px 6px; border-radius: 6px; }
+
+  @media (max-width: 900px) {
+    nav { display: none; }
+    .steps, .features { grid-template-columns: 1fr; }
+    .plans { grid-template-columns: 1fr; }
+    .mock-body { grid-template-columns: 1fr; } .mock-side { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .mock-btns { margin-left: 0; width: 100%; }
+    .steps { gap: 28px; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 32 32"><path d="M16 2 28 9v14L16 30 4 23V9z" fill="#8b5cf6"/><path d="M16 8l6 4v8l-6 4-6-4v-8z" fill="#c4b5fd"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l3 3M15 8l2 2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24"><path d="m4 17 6-5-6-5M12 19h8"/></symbol>
+</svg>
+
+<header>
+  <div class="wrap top">
+    <a class="logo" href="#"><svg><use href="#logo"/></svg><div>Crystal<span>Host</span></div></a>
+    <nav><a href="#so-gehts">So geht's</a><a href="#features">Features</a><a href="#preise">Preise</a><a href="#faq">FAQ</a></nav>
+    <a class="btn btn-primary btn-sm" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="pill">✨ <b>100 % kostenlos</b> · kein Konto nötig</span>
+    <h1>Dein Minecraft-Server.<br><span>Auf deinem PC.</span></h1>
+    <p class="lead">Ein Klick – und CrystalHost richtet auf deinem Computer einen Minecraft-Server mit professionellem Web-Panel ein. Starten, Plugins, Dateien und Zugänge für deine Freunde – alles im Browser.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
+      <a class="btn btn-ghost" href="#so-gehts">So funktioniert's</a>
+    </div>
+    <div class="note">Für Windows 10 &amp; 11 · Java, Server und Panel werden automatisch eingerichtet</div>
+
+    <div class="mock" aria-hidden="true">
+      <div class="mock-bar"><i></i><i></i><i></i><em>127.0.0.1:8130 · CrystalHost Panel</em></div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="on"><svg class="i"><use href="#i-panel"/></svg>Übersicht</div>
+          <div><svg class="i"><use href="#i-term"/></svg>Konsole</div>
+          <div><svg class="i"><use href="#i-folder"/></svg>Dateien</div>
+          <div><svg class="i"><use href="#i-plug"/></svg>Plugins</div>
+          <div><svg class="i"><use href="#i-key"/></svg>Zugänge</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-head"><b>MeinSMP</b><span class="ok">● ONLINE</span><div class="mock-btns"><span>▶ Starten</span><span>↻ Neustart</span><span>■ Stoppen</span></div></div>
+          <div class="stats">
+            <div class="stat"><small>CPU</small><b>12 %</b><div class="bar"><span style="width:12%"></span></div></div>
+            <div class="stat"><small>RAM</small><b>2.4 / 4 GB</b><div class="bar"><span style="width:60%"></span></div></div>
+            <div class="stat"><small>Spieler</small><b>5 / 20</b><div class="bar"><span style="width:25%"></span></div></div>
+            <div class="stat"><small>TPS</small><b>20.0</b><div class="bar"><span style="width:100%"></span></div></div>
+          </div>
+          <div class="term"><span class="g">[19:58:40]</span> Done (7.0s)! For help, type "help"<br><span class="g">[19:59:12]</span> Steve joined the game<br><span class="g">[19:59:30]</span> Alex joined the game<br><span class="p">&gt; /say Willkommen auf meinem Server!</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="so-gehts">
+    <div class="eyebrow">So geht's</div>
+    <h2>In 3 Minuten online</h2>
+    <p class="sub">Kein Technik-Wissen nötig. Das Setup erledigt alles für dich – Java, Minecraft-Server und Panel.</p>
+    <div class="steps">
+      <div class="step"><h3>Setup herunterladen</h3><p>Lade <code>CrystalHost-Setup.bat</code> herunter und öffne sie per Doppelklick.</p></div>
+      <div class="step"><h3>Ein paar Fragen beantworten</h3><p>Name deines Servers, wie viel RAM er bekommt – fertig. Den Rest macht CrystalHost.</p></div>
+      <div class="step"><h3>Panel öffnet sich</h3><p>Melde dich mit deinem Owner-Code an und schick deinen Freunden die Server-Adresse.</p></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="eyebrow">Features</div>
+    <h2>Alles, was ein echter Host kann</h2>
+    <p class="sub">Das gleiche Panel, mit dem auch große Server verwaltet werden – nur kostenlos und auf deinem eigenen PC.</p>
+    <div class="features">
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-panel"/></svg></div><h3>Live-Dashboard</h3><p>CPU, RAM, Spieler und TPS in Echtzeit. Starten, Neustarten und Stoppen mit einem Klick.</p></div>
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-term"/></svg></div><h3>Konsole im Browser</h3><p>Sieh das Server-Log live und führe Befehle aus – auch vom Handy aus.</p></div>
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-folder"/></svg></div><h3>Dateimanager</h3><p>Dateien hochladen, Configs direkt im Browser bearbeiten, herunterladen und löschen – mit Papierkorb.</p></div>
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-plug"/></svg></div><h3>Plugins per Drag &amp; Drop</h3><p>Plugin-Datei reinziehen, fertig. An/Aus-Schalter für jedes Plugin, sauberes Austauschen beim Neustart.</p></div>
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-key"/></svg></div><h3>Zugänge mit Rechten</h3><p>Erstelle Login-Codes für Freunde und bestimme genau, was jeder darf. Nur du als Owner verwaltest die Codes.</p></div>
+      <div class="feat"><div class="ic"><svg class="i"><use href="#i-globe"/></svg></div><h3>Von überall erreichbar</h3><p>Deine Freunde joinen über eine automatische Adresse – ohne Router-Einstellungen. Das Panel geht auch von unterwegs.</p></div>
+    </div>
+  </section>
+
+  <section id="preise">
+    <div class="eyebrow">Preise</div>
+    <h2>Kostenlos. Für immer.</h2>
+    <p class="sub">Starte gratis mit einem Server. Für noch mehr kommt bald Premium.</p>
+    <div class="plans">
+      <div class="plan free">
+        <span class="tag">Jetzt verfügbar</span>
+        <h3>Free</h3>
+        <div class="price">0 € <small>/ für immer</small></div>
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>1 Minecraft-Server (Paper)</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Komplettes Web-Panel</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Dateien, Plugins &amp; Konsole</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Zugangscodes mit Rechten</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Automatische Adresse für Freunde</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Neustart nach Absturz</li>
+        </ul>
+        <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
+      </div>
+      <div class="plan pro">
+        <span class="tag">Bald verfügbar</span>
+        <h3>Premium</h3>
+        <div class="price">bald <small>✨</small></div>
+        <ul>
+          <li><svg class="i"><use href="#i-check"/></svg>Mehrere Server gleichzeitig</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Feste Adresse statt wechselnder</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Automatische Backups</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Ein-Klick-Plugin-Shop</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Vanilla, Fabric &amp; Modpacks</li>
+          <li><svg class="i"><use href="#i-check"/></svg>Bevorzugter Support</li>
+        </ul>
+        <button class="btn btn-ghost soon" type="button" disabled>Kommt bald</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="eyebrow">FAQ</div>
+    <h2>Häufige Fragen</h2>
+    <p class="sub">Noch etwas unklar? Hier findest du die wichtigsten Antworten.</p>
+    <div class="faq">
+      <details><summary>Ist das wirklich kostenlos?</summary><p>Ja. Der Server läuft auf deinem eigenen PC, deshalb entstehen keine Hosting-Kosten. Du brauchst nur deinen Computer und Internet.</p></details>
+      <details><summary>Läuft der Server, wenn mein PC aus ist?</summary><p>Nein – der Server läuft auf deinem PC. Ist der PC aus oder im Ruhezustand, ist auch der Server offline. Tipp: Stell den Energiesparmodus so ein, dass der PC nicht einschläft.</p></details>
+      <details><summary>Wie viel Leistung braucht mein PC?</summary><p>Für ein paar Freunde reichen 8 GB RAM im PC (davon 2–4 GB für den Server) und ein halbwegs aktueller Prozessor. Je mehr Spieler und Plugins, desto mehr RAM.</p></details>
+      <details><summary>Wie joinen meine Freunde?</summary><p>Im Panel steht die „Adresse für Freunde“. Die kopierst du und schickst sie weiter – die Adresse kann sich nach einem Neustart ändern (im Premium-Plan kommt eine feste Adresse).</p></details>
+      <details><summary>Ist das sicher?</summary><p>Das Panel läuft nur auf deinem PC und ist mit persönlichen Codes geschützt. Nach mehreren falschen Codes wird gesperrt, und jeder Freund bekommt nur die Rechte, die du ihm gibst. Gib deinen Owner-Code niemals weiter.</p></details>
+      <details><summary>Windows warnt beim Öffnen der Setup-Datei – ist das normal?</summary><p>Ja. Windows warnt bei neuen Dateien aus dem Internet. Klick auf „Weitere Informationen“ und dann „Trotzdem ausführen“. Das Setup installiert nichts systemweit – alles landet im Ordner <code>CrystalHost</code> in deinem Benutzerordner.</p></details>
+      <details><summary>Was brauche ich für Minecraft?</summary><p>Deine Freunde brauchen Minecraft: Java Edition in der passenden Version. Mit dem Setup akzeptierst du die Minecraft-EULA von Mojang.</p></details>
+    </div>
+  </section>
+
+  <div class="final">
+    <h2>Bereit für deinen eigenen Server?</h2>
+    <p class="sub" style="margin-bottom:26px">Kostenlos, in wenigen Minuten und ohne Konto.</p>
+    <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="logo" href="#" style="font-size:16px"><svg style="width:24px;height:24px"><use href="#logo"/></svg><div>Crystal<span>Host</span></div></a>
+    <span>© 2026 CrystalHost · Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden.</span>
+  </div>
+</footer>
+</body>
+</html>
