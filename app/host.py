@@ -667,12 +667,19 @@ class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.cors()
+        if self.headers.get("Origin") in ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
+
+    def direct_local(self):
+        """Anfrage kommt vom Browser auf DIESEM PC - nicht ueber den Tunnel (Cloudflare setzt immer Cf-Ray)."""
+        return (self.client_address[0] in ("127.0.0.1", "::1") and not self.headers.get("Cf-Ray")
+                and not self.headers.get("CF-Connecting-IP") and self.headers.get("Origin") in ALLOWED_ORIGINS)
 
     def do_GET(self):
         path, _, query = self.path.partition("?")
         if path == "/api/ping":
-            return self.reply(200, {"ok": True})
+            return self.reply(200, {"ok": True, "name": CFG.get("name", "Server"), "local": self.direct_local()})
         if path in ("/", "/index.html"):
             try:
                 with open(WEB_FILE, "rb") as f:
@@ -739,6 +746,15 @@ class Handler(BaseHTTPRequestHandler):
         if not self.origin_ok():
             return self.reply(403, {"error": "Herkunft nicht erlaubt"})
         path = self.path.split("?")[0]
+        if path == "/api/login/local":
+            # Auf dem eigenen PC braucht es keinen Code: der Besitzer sitzt ja vor dem Rechner
+            if not self.direct_local():
+                return self.reply(403, {"error": "Ohne Code nur direkt auf dem PC moeglich, auf dem der Server laeuft"})
+            uid, u = next((k, v) for k, v in load_access()["users"].items() if v["role"] == "owner")
+            token = secrets.token_urlsafe(32)
+            with lock:
+                sessions[token] = {"id": uid, "name": u["name"], "role": "owner", "exp": time.time() + SESSION_HOURS * 3600}
+            return self.reply(200, {"token": token, "name": u["name"], "role": "owner"})
         if path == "/api/login":
             ip = self.ip()
             if blocked(ip):

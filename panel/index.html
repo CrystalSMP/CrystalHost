@@ -270,12 +270,20 @@
 <section class="login" id="loginView">
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="logo"><svg><use href="#i-logo"/></svg><div>Crystal<span>Host</span></div></div>
-    <h1>Willkommen zurück 👋</h1>
-    <p>Melde dich mit deinem Server-Code an (beginnt mit <b>CH-</b>). Deinen Owner-Code hat dir das Setup am Ende angezeigt – er steht auch in <b>ZUGANG.txt</b> in deinem CrystalHost-Ordner.</p>
-    <label class="lbl" for="keyInput">Zugangsschlüssel</label>
-    <input id="keyInput" type="password" placeholder="CH-XXXXXXXXXXXX-…" required>
-    <label class="check"><input type="checkbox" id="remember" checked> Auf diesem Gerät angemeldet bleiben</label>
-    <button class="btn btn-primary w100" id="loginBtn" type="submit">Anmelden</button>
+    <h1 id="localTitle">Dein Server wird gesucht …</h1>
+    <p id="localMsg">CrystalHost sucht den Server auf diesem PC. Einen Moment.</p>
+    <div id="localActions" hidden style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">
+      <button class="btn btn-primary w100" id="retryLocal" type="button">Nochmal suchen</button>
+      <a class="btn w100" href="../#so-gehts" style="text-align:center">Noch keinen Server? Setup herunterladen</a>
+    </div>
+    <details id="codeLogin" style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:13px">Von einem anderen Gerät oder als Freund anmelden</summary>
+      <p style="margin-top:10px">Freunde bekommen vom Owner einen Code (beginnt mit <b>CH-</b>). Auch du kannst damit von unterwegs rein – dein Code steht in <b>ZUGANG.txt</b> im CrystalHost-Ordner.</p>
+      <label class="lbl" for="keyInput">Zugangscode</label>
+      <input id="keyInput" type="password" placeholder="CH-XXXXXXXXXXXX-…">
+      <label class="check"><input type="checkbox" id="remember" checked> Auf diesem Gerät angemeldet bleiben</label>
+      <button class="btn btn-primary w100" id="loginBtn" type="submit">Mit Code anmelden</button>
+    </details>
     <div class="err" id="loginErr"></div>
     <div class="secure"><svg class="i"><use href="#i-lock"/></svg>Verschlüsselte Verbindung · nur für freigeschaltete Nutzer</div>
   </form>
@@ -484,6 +492,36 @@
     } catch {}
     return false;
   }
+  // ---- Ohne Code: Server auf DIESEM PC finden (Panel lauscht auf 127.0.0.1:8130 und folgende) ----
+  async function findLocal() {
+    const quick = (url, ms) => Promise.race([fetch(url, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null), new Promise(r => setTimeout(() => r(null), ms))]);
+    if (!location.hostname.endsWith('github.io')) { const d = await quick('/api/ping', 2000); if (d && d.local) return ''; }
+    const found = await Promise.all(Array.from({ length: 10 }, (_, i) => 8130 + i).map(async port => {
+      const base = `http://127.0.0.1:${port}`; const d = await quick(base + '/api/ping', 2500);
+      return d && d.local ? base : null;
+    }));
+    return found.find(Boolean) ?? null;
+  }
+  async function localLogin() {
+    $('localTitle').textContent = 'Dein Server wird gesucht …'; $('localMsg').textContent = 'CrystalHost sucht den Server auf diesem PC. Einen Moment.';
+    $('localActions').hidden = true; $('loginErr').textContent = '';
+    const base = await findLocal();
+    if (base === null) {
+      $('localTitle').textContent = 'Kein Server auf diesem PC gefunden';
+      $('localMsg').textContent = 'Starte CrystalHost über die Verknüpfung auf deinem Desktop (oder den PC neu) und such nochmal. Ist das nicht dein Server-PC, melde dich unten mit einem Code an.';
+      $('localActions').hidden = false; $('localActions').style.display = 'flex';
+      return false;
+    }
+    API = base;
+    try {
+      const d = await post('/api/login/local', {});
+      token = d.token; me = d.name; role = d.role;
+      store.set('ch_token', token, true); store.set('ch_name', me, true); store.set('ch_role', role, true); store.set('ch_api', base, true);
+      showApp(); return true;
+    } catch (err) { $('localTitle').textContent = 'Anmeldung nicht möglich'; $('localMsg').textContent = err.message; $('localActions').hidden = false; return false; }
+  }
+  $('retryLocal').onclick = () => localLogin();
+
   async function call(path, opts = {}) {
     const r = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) } });
     if (r.status === 401) { logout(true); throw new Error('Sitzung abgelaufen'); }
@@ -499,6 +537,7 @@
     $('loginErr').textContent = ''; $('loginBtn').disabled = true; $('loginBtn').textContent = 'Prüfe …';
     try {
       const code = $('keyInput').value.trim();
+      if (!code) throw new Error('Bitte Code eingeben.');
       if (location.hostname.endsWith('github.io') && !serverIdOf(code) && !store.get('ch_sid')) throw new Error('Das ist kein CrystalHost-Code (er beginnt mit CH-…).');
       if (!API && !(await discover(code))) throw new Error('Dein Server ist gerade nicht erreichbar – ist der PC an und CrystalHost gestartet?');
       const d = await post('/api/login', { key: code });
@@ -514,6 +553,7 @@
     if (!expired) { store.clear('ch_api'); store.clear('ch_sid'); API = ''; }
     $('appView').hidden = true; $('loginView').hidden = false;
     if (expired) $('loginErr').textContent = 'Bitte erneut anmelden.';
+    $('localTitle').textContent = 'Abgemeldet'; $('localMsg').textContent = 'Klick auf „Nochmal suchen“, um wieder in dein Panel zu kommen.'; $('localActions').hidden = false; $('localActions').style.display = 'flex';
   }
   $('logout').onclick = () => logout(false);
 
@@ -823,7 +863,7 @@
   }
   setInterval(pollStatus, 3000);
   setInterval(pollConsole, 2000);
-  discover().then(ok => { if (token && ok) showApp(); });
+  discover().then(ok => { if (token && ok) showApp(); else localLogin(); });
 })();
 </script>
 </body>

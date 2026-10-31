@@ -269,18 +269,15 @@ $btnGo.Add_Click({
         # ------------------------------------------------------------- Fertig
         foreach ($c in @($form.Controls)) { if ($c -ne $title) { $c.Visible = $false } }
         $sub.Visible = $true; $sub.Text = "Dein Server '$name' ist eingerichtet! 🎉"; $sub.ForeColor = [Drawing.Color]::FromArgb(34, 197, 94)
-        New-Label "Dein Owner-Code (nur für dich – gut aufbewahren):" 30 110 500 22 $fontBold | Out-Null
-        $tbCode = New-Box 30 136 500 $code; $tbCode.ReadOnly = $true; $tbCode.Font = New-Object Drawing.Font("Consolas", 13, [Drawing.FontStyle]::Bold); $tbCode.Height = 32
-        $btnCopy = New-Button "Code kopieren" 30 182 160
-        $btnCopy.Add_Click({ [Windows.Forms.Clipboard]::SetText($tbCode.Text); $btnCopy.Text = "Kopiert ✓" })
-        New-Label "So geht's weiter:" 30 240 500 22 $fontBold | Out-Null
-        New-Label "1.  Öffne das Panel und melde dich mit dem Code an." 30 266 500 22 | Out-Null
-        New-Label "2.  Unter 'Zugänge' erstellst du Codes für Freunde." 30 290 500 22 | Out-Null
-        New-Label "3.  Die Adresse für deine Freunde steht oben im Panel." 30 314 500 22 | Out-Null
-        New-Label "Das Panel funktioniert von überall, solange dieser PC an ist." 30 350 500 22 $fontUi $muted | Out-Null
-        $btnPanel = New-Button "Panel öffnen" 30 392 500 $true
+        New-Label "Dein Server läuft jetzt auf diesem PC." 30 112 500 24 $fontBold | Out-Null
+        New-Label "So geht's weiter:" 30 150 500 22 $fontBold | Out-Null
+        New-Label "1.  Klick auf 'Panel öffnen' – du bist sofort drin, ganz ohne Code." 30 176 500 22 | Out-Null
+        New-Label "2.  Die Adresse für deine Freunde steht oben im Panel." 30 200 500 22 | Out-Null
+        New-Label "3.  Später: Desktop-Verknüpfung '$name - Panel' benutzen." 30 224 500 22 | Out-Null
+        New-Label "Freunde oder du von unterwegs brauchen einen Zugangscode – den erstellst du im Panel unter 'Zugänge'. Dein eigener steht in ZUGANG.txt." 30 262 500 44 $fontUi $muted | Out-Null
+        $btnPanel = New-Button "Panel öffnen" 30 330 500 $true
         $btnPanel.Add_Click({ Start-Process $PANEL_URL })
-        $btnClose = New-Button "Fertig" 30 440 500
+        $btnClose = New-Button "Fertig" 30 378 500
         $btnClose.Add_Click({ $form.Close() })
     } catch {
         $lblStep.Text = "Das hat leider nicht geklappt"; $lblStep.ForeColor = [Drawing.Color]::FromArgb(239, 68, 68)
