@@ -271,9 +271,9 @@
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="logo"><svg><use href="#i-logo"/></svg><div>Crystal<span>Host</span></div></div>
     <h1>Willkommen zurück 👋</h1>
-    <p>Melde dich mit deinem Zugangscode an. Den Owner-Code findest du in der Datei <b>ZUGANG.txt</b> in deinem CrystalHost-Ordner.</p>
+    <p>Melde dich mit deinem Server-Code an (beginnt mit <b>CH-</b>). Deinen Owner-Code hat dir das Setup am Ende angezeigt – er steht auch in <b>ZUGANG.txt</b> in deinem CrystalHost-Ordner.</p>
     <label class="lbl" for="keyInput">Zugangsschlüssel</label>
-    <input id="keyInput" type="password" placeholder="••••••••••••••••" required>
+    <input id="keyInput" type="password" placeholder="CH-XXXXXXXXXXXX-…" required>
     <label class="check"><input type="checkbox" id="remember" checked> Auf diesem Gerät angemeldet bleiben</label>
     <button class="btn btn-primary w100" id="loginBtn" type="submit">Anmelden</button>
     <div class="err" id="loginErr"></div>
@@ -461,19 +461,27 @@
   const fmtDate = t => new Date(t).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 
   // ---------- Verbindung ----------
-  async function discover() {
-    // Seite kommt direkt vom Panel (lokal oder ueber den Tunnel): gleiche Adresse
-    if (!location.hostname.endsWith('github.io') && await fetch('/api/ping', { cache: 'no-store' }).then(r => r.ok).catch(() => false)) { API = ''; return true; }
-    if (location.hostname === 'localhost') { API = 'http://127.0.0.1:8130'; return true; }
-    const sources = []; // Panel-Seite kommt immer direkt vom eigenen PC
-    for (const [i, url] of sources.entries()) {
-      try {
-        const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) continue;
-        const d = await r.json(); const cfg = i ? JSON.parse(atob(d.content.replace(/\n/g, ''))) : d;
-        const api = (cfg.api || '').replace(/\/$/, ''); if (!api) continue;
-        if (await fetch(api + '/api/ping', { cache: 'no-store' }).then(r => r.ok).catch(() => false)) { API = api; return true; }
-      } catch {}
-    }
+  // Panel-Adresse finden:
+  //  1. Seite kommt direkt vom eigenen PC (lokal oder ueber den Tunnel) -> gleiche Adresse
+  //  2. Seite auf der CrystalHost-Website -> Server-ID aus dem Login-Code, Adresse steht unter ntfy.sh/crystalhost-<ID>
+  const serverIdOf = code => { const m = /^CH-([0-9A-F]{12})-/i.exec((code || '').trim()); return m ? m[1].toLowerCase() : ''; };
+  const ping = api => fetch(api + '/api/ping', { cache: 'no-store' }).then(r => r.ok).catch(() => false);
+  async function discover(code) {
+    if (!location.hostname.endsWith('github.io') && await ping('')) { API = ''; return true; }
+    const saved = store.get('ch_api');
+    if (saved && await ping(saved)) { API = saved; return true; }
+    const sid = serverIdOf(code) || store.get('ch_sid') || '';
+    if (!sid) return false;
+    try {
+      const r = await fetch(`https://ntfy.sh/crystalhost-${sid}/json?poll=1&since=24h`, { cache: 'no-store' });
+      const lines = (await r.text()).trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(m => m && m.event === 'message');
+      for (const m of lines.reverse()) {
+        const api = (m.message || '').trim().replace(/\/$/, '');
+        if (/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(api) && await ping(api)) {
+          API = api; store.set('ch_api', api, true); store.set('ch_sid', sid, true); return true;
+        }
+      }
+    } catch {}
     return false;
   }
   async function call(path, opts = {}) {
@@ -490,8 +498,10 @@
     e.preventDefault();
     $('loginErr').textContent = ''; $('loginBtn').disabled = true; $('loginBtn').textContent = 'Prüfe …';
     try {
-      if (!API && !(await discover())) throw new Error('Panel nicht erreichbar – läuft der Server-PC?');
-      const d = await post('/api/login', { key: $('keyInput').value.trim() });
+      const code = $('keyInput').value.trim();
+      if (location.hostname.endsWith('github.io') && !serverIdOf(code) && !store.get('ch_sid')) throw new Error('Das ist kein CrystalHost-Code (er beginnt mit CH-…).');
+      if (!API && !(await discover(code))) throw new Error('Dein Server ist gerade nicht erreichbar – ist der PC an und CrystalHost gestartet?');
+      const d = await post('/api/login', { key: code });
       token = d.token; me = d.name; role = d.role;
       store.set('ch_token', token, $('remember').checked); store.set('ch_name', me, $('remember').checked); store.set('ch_role', role, $('remember').checked);
       $('keyInput').value = ''; showApp();
@@ -501,6 +511,7 @@
   function logout(expired) {
     if (token && !expired) post('/api/logout').catch(() => {});
     token = null; role = ''; store.clear('ch_token'); store.clear('ch_name'); store.clear('ch_role');
+    if (!expired) { store.clear('ch_api'); store.clear('ch_sid'); API = ''; }
     $('appView').hidden = true; $('loginView').hidden = false;
     if (expired) $('loginErr').textContent = 'Bitte erneut anmelden.';
   }

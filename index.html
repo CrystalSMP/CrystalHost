@@ -146,8 +146,8 @@
 <header>
   <div class="wrap top">
     <a class="logo" href="#"><svg><use href="#logo"/></svg><div>Crystal<span>Host</span></div></a>
-    <nav><a href="#so-gehts">So geht's</a><a href="#features">Features</a><a href="#preise">Preise</a><a href="#faq">FAQ</a></nav>
-    <a class="btn btn-primary btn-sm" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
+    <nav><a href="#so-gehts">So geht's</a><a href="#features">Features</a><a href="#preise">Preise</a><a href="#faq">FAQ</a><a href="panel/" style="color:#fff;font-weight:700">Panel-Login</a></nav>
+    <a class="btn btn-primary btn-sm" href="setup/CrystalHost-Setup.vbs" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
   </div>
 </header>
 
@@ -157,10 +157,10 @@
     <h1>Dein Minecraft-Server.<br><span>Auf deinem PC.</span></h1>
     <p class="lead">Ein Klick – und CrystalHost richtet auf deinem Computer einen Minecraft-Server mit professionellem Web-Panel ein. Starten, Plugins, Dateien und Zugänge für deine Freunde – alles im Browser.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
-      <a class="btn btn-ghost" href="#so-gehts">So funktioniert's</a>
+      <a class="btn btn-primary" href="setup/CrystalHost-Setup.vbs" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
+      <a class="btn btn-ghost" href="panel/">Ich habe schon einen Server → Panel</a>
     </div>
-    <div class="note">Für Windows 10 &amp; 11 · Java, Server und Panel werden automatisch eingerichtet</div>
+    <div class="note">Für Windows 10 &amp; 11 · kein Terminal, alles in einem Fenster · auch für Server, die schon auf deinem PC liegen</div>
 
     <div class="mock" aria-hidden="true">
       <div class="mock-bar"><i></i><i></i><i></i><em>127.0.0.1:8130 · CrystalHost Panel</em></div>
@@ -191,9 +191,9 @@
     <h2>In 3 Minuten online</h2>
     <p class="sub">Kein Technik-Wissen nötig. Das Setup erledigt alles für dich – Java, Minecraft-Server und Panel.</p>
     <div class="steps">
-      <div class="step"><h3>Setup herunterladen</h3><p>Lade <code>CrystalHost-Setup.bat</code> herunter und öffne sie per Doppelklick.</p></div>
-      <div class="step"><h3>Ein paar Fragen beantworten</h3><p>Name deines Servers, wie viel RAM er bekommt – fertig. Den Rest macht CrystalHost.</p></div>
-      <div class="step"><h3>Panel öffnet sich</h3><p>Melde dich mit deinem Owner-Code an und schick deinen Freunden die Server-Adresse.</p></div>
+      <div class="step"><h3>Setup herunterladen</h3><p>Lade <code>CrystalHost-Setup.vbs</code> herunter und öffne sie per Doppelklick – es öffnet sich ein Fenster, kein Terminal.</p></div>
+      <div class="step"><h3>Neu oder vorhanden?</h3><p>Neuen Server erstellen oder deinen <b>schon vorhandenen Server</b> auswählen. Name und RAM eintragen – den Rest macht CrystalHost.</p></div>
+      <div class="step"><h3>Online-Panel</h3><p>Melde dich auf <a href="panel/" style="color:#c4b5fd">crystalsmp.github.io/CrystalHost/panel</a> mit deinem Code an – von überall, auch vom Handy.</p></div>
     </div>
   </section>
 
@@ -228,7 +228,7 @@
           <li><svg class="i"><use href="#i-check"/></svg>Automatische Adresse für Freunde</li>
           <li><svg class="i"><use href="#i-check"/></svg>Neustart nach Absturz</li>
         </ul>
-        <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
+        <a class="btn btn-primary" href="setup/CrystalHost-Setup.vbs" download><svg class="i"><use href="#i-dl"/></svg>Kostenlos starten</a>
       </div>
       <div class="plan pro">
         <span class="tag">Bald verfügbar</span>
@@ -257,6 +257,8 @@
       <details><summary>Wie viel Leistung braucht mein PC?</summary><p>Für ein paar Freunde reichen 8 GB RAM im PC (davon 2–4 GB für den Server) und ein halbwegs aktueller Prozessor. Je mehr Spieler und Plugins, desto mehr RAM.</p></details>
       <details><summary>Wie joinen meine Freunde?</summary><p>Im Panel steht die „Adresse für Freunde“. Die kopierst du und schickst sie weiter – die Adresse kann sich nach einem Neustart ändern (im Premium-Plan kommt eine feste Adresse).</p></details>
       <details><summary>Ist das sicher?</summary><p>Das Panel läuft nur auf deinem PC und ist mit persönlichen Codes geschützt. Nach mehreren falschen Codes wird gesperrt, und jeder Freund bekommt nur die Rechte, die du ihm gibst. Gib deinen Owner-Code niemals weiter.</p></details>
+      <details><summary>Kann ich meinen schon vorhandenen Server benutzen?</summary><p>Ja. Wähle im Setup „Vorhandenen Server benutzen“ und den Ordner deines Servers. Deine Welt, Plugins und Einstellungen bleiben, CrystalHost startet ihn nur und gibt dir das Panel dazu. Wichtig: Der Server darf beim Einrichten nicht gerade laufen.</p></details>
+      <details><summary>Wie komme ich ins Panel?</summary><p>Über <a href="panel/" style="color:#c4b5fd">Panel-Login</a> oben auf dieser Seite, mit dem Code, den dir das Setup am Ende anzeigt (beginnt mit CH-…). Der Code führt automatisch zu deinem Server – jeder kommt nur in seinen eigenen.</p></details>
       <details><summary>Windows warnt beim Öffnen der Setup-Datei – ist das normal?</summary><p>Ja. Windows warnt bei neuen Dateien aus dem Internet. Klick auf „Weitere Informationen“ und dann „Trotzdem ausführen“. Das Setup installiert nichts systemweit – alles landet im Ordner <code>CrystalHost</code> in deinem Benutzerordner.</p></details>
       <details><summary>Was brauche ich für Minecraft?</summary><p>Deine Freunde brauchen Minecraft: Java Edition in der passenden Version. Mit dem Setup akzeptierst du die Minecraft-EULA von Mojang.</p></details>
     </div>
@@ -265,7 +267,7 @@
   <div class="final">
     <h2>Bereit für deinen eigenen Server?</h2>
     <p class="sub" style="margin-bottom:26px">Kostenlos, in wenigen Minuten und ohne Konto.</p>
-    <a class="btn btn-primary" href="setup/CrystalHost-Setup.bat" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
+    <a class="btn btn-primary" href="setup/CrystalHost-Setup.vbs" download><svg class="i"><use href="#i-dl"/></svg>Setup herunterladen</a>
   </div>
 </main>
 

@@ -23,10 +23,20 @@ from urllib.parse import parse_qs
 BASE = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE, "host.json"), encoding="utf-8-sig") as _f:
     CFG = json.load(_f)
-DIR = os.path.realpath(os.path.join(BASE, "server"))  # nur dieser Ordner ist im Dateimanager sichtbar
+# Minecraft-Ordner: neu eingerichtet (server/) oder ein schon vorhandener Server auf dem PC (serverDir)
+DIR = os.path.realpath(CFG.get("serverDir") or os.path.join(BASE, "server"))  # nur dieser Ordner ist im Dateimanager sichtbar
+JAR = CFG.get("jar") or "server.jar"
+# Server-ID: steckt in jedem Login-Code; darunter findet die CrystalHost-Website die aktuelle Panel-Adresse
+if not CFG.get("serverId"):
+    import secrets as _s
+    CFG["serverId"] = _s.token_hex(6)
+    with open(os.path.join(BASE, "host.json"), "w", encoding="utf-8") as _f:
+        json.dump(CFG, _f, indent=2, ensure_ascii=False)
+SERVER_ID = CFG["serverId"].lower()
+RELAY = "https://ntfy.sh/crystalhost-" + SERVER_ID
 PORT = int(CFG.get("panelPort", 8130))
 MC_PORT = int(CFG.get("port", 25565))
-ALLOWED_ORIGINS = {f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}"}
+ALLOWED_ORIGINS = {"https://crystalsmp.github.io", f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}"}
 ADDRESS_TXT = os.path.join(BASE, "PANEL-ADRESSE.txt")  # aktuelle Panel-Adresse fuer unterwegs
 # Panel-Seite liegt im Server-Ordner und wird direkt ausgeliefert: http://127.0.0.1:8130
 WEB_FILE = os.path.join(BASE, "web", "index.html")
@@ -94,7 +104,8 @@ def save_access(data):
 
 
 def new_code():
-    return "CS-" + "-".join(secrets.token_hex(3).upper() for _ in range(5))
+    # CH-<Server-ID>-<Geheimteil>: die Website liest die Server-ID, nur der ganze Code meldet an
+    return "CH-" + SERVER_ID.upper() + "-" + "-".join(secrets.token_hex(3).upper() for _ in range(4))
 
 
 def digest_of(code):
@@ -262,7 +273,7 @@ def java_pid():
     if p and p.poll() is None:
         return p.pid
     # Server wurde vor einem Panel-Neustart gestartet: am Server-Ordner in der Befehlszeile erkennen
-    jar = os.path.join(DIR, "server.jar").replace("'", "''")
+    jar = os.path.join(DIR, JAR).replace("'", "''")
     out = ps(f"(Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | ? {{ $_.CommandLine -like '*{jar}*' }}).ProcessId")
     return int(out.split()[0]) if out else None
 
@@ -309,7 +320,7 @@ def status():
         state = "starting"
     data = {"state": state, "flag": False, "time": int(time.time() * 1000), "name": CFG.get("name", "Server"),
             "version": CFG.get("version"), "address": PUBLIC["address"], "panelUrl": PUBLIC["panel"],
-            "localAddress": f"localhost:{MC_PORT}", "ramMax": RAM_MB, "plan": CFG.get("plan", "free")}
+            "localAddress": f"localhost:{MC_PORT}", "ramMax": RAM_MB, "plan": CFG.get("plan", "free"), "serverId": SERVER_ID.upper()}
     if pid:
         data["resources"] = resources(pid)
     if state == "online":
@@ -336,7 +347,7 @@ def launch():
     PROC["p"] = subprocess.Popen([JAVA, f"-Xms{max(512, RAM_MB // 2)}M", f"-Xmx{RAM_MB}M", "-XX:+UseG1GC",
                                   # Windows-Zertifikate nutzen (Virenscanner/Router mit HTTPS-Pruefung brechen sonst den ersten Download ab)
                                   "-Djavax.net.ssl.trustStoreType=Windows-ROOT",
-                                  "-jar", os.path.join(DIR, "server.jar"), "nogui"],
+                                  "-jar", os.path.join(DIR, JAR), "nogui"],
                                  cwd=DIR, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                  creationflags=flags)
     PROC["started"] = time.time()
@@ -845,12 +856,32 @@ def run_tunnel(args, pattern, on_url, name):
         time.sleep(15)
 
 
+def announce(url):
+    """Aktuelle Panel-Adresse unter der Server-ID ablegen (ntfy.sh), damit die CrystalHost-Website sie findet."""
+    try:
+        req = urllib.request.Request(RELAY, data=url.encode(), method="POST",
+                                     headers={"Title": "CrystalHost", "Cache": "yes", "X-Tags": "crystalhost"})
+        urllib.request.urlopen(req, timeout=15).close()
+        return True
+    except Exception as e:
+        log(f"Panel-Adresse konnte nicht gemeldet werden: {e}")
+        return False
+
+
+def announce_loop():
+    # ntfy behaelt Nachrichten ca. 12 Stunden -> regelmaessig erneuern
+    while True:
+        time.sleep(4 * 3600)
+        if PUBLIC["panel"]:
+            announce(PUBLIC["panel"])
+
+
 def panel_url(url):
     PUBLIC["panel"] = url
     ALLOWED_ORIGINS.add(url)
     with open(ADDRESS_TXT, "w", encoding="utf-8") as f:
         f.write(url + "\n")
-    log(f"Panel von unterwegs: {url}")
+    log(f"Panel von unterwegs: {url}" + (" (auf der Website gemeldet)" if announce(url) else ""))
 
 
 def mc_address(addr):
@@ -882,6 +913,7 @@ def main():
     if os.environ.get("HOST_NO_TUNNEL") != "1":
         start_tunnels()
     threading.Thread(target=supervisor, daemon=True).start()
+    threading.Thread(target=announce_loop, daemon=True).start()
     if CFG.get("autostart", True) and not java_pid():
         PROC["want"] = True
         launch()

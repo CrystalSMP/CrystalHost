@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>CrystalHost</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 9v14L16 30 4 23V9z' fill='%238b5cf6'/%3E%3Cpath d='M16 8l6 4v8l-6 4-6-4v-8z' fill='%23c4b5fd'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090b10;
+    --side: #0d1016;
+    --card: #12161f;
+    --card-2: #181d29;
+    --hover: #1d2331;
+    --line: #222938;
+    --fg: #e8ebf2;
+    --muted: #8892a6;
+    --accent: #8b5cf6;
+    --accent-2: #a78bfa;
+    --grad: linear-gradient(135deg, #8b5cf6, #6366f1 55%, #3b82f6);
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.5 "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; cursor: pointer; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  [hidden] { display: none !important; }
+  svg.i { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: #262e3f; border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+
+  /* ---------- Login ---------- */
+  .login { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; position: relative; overflow: hidden;
+    background: radial-gradient(700px 500px at 15% 0%, rgba(139,92,246,.22), transparent 60%), radial-gradient(700px 500px at 100% 100%, rgba(59,130,246,.16), transparent 60%), var(--bg); }
+  .login::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle at 50% 40%, #000, transparent 70%); -webkit-mask-image: radial-gradient(circle at 50% 40%, #000, transparent 70%); }
+  .login-card { position: relative; width: 100%; max-width: 410px; background: rgba(18,22,31,.85); backdrop-filter: blur(16px); border: 1px solid var(--line); border-radius: 18px; padding: 34px 30px; box-shadow: 0 40px 100px rgba(0,0,0,.55); }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+  .logo svg { width: 30px; height: 30px; filter: drop-shadow(0 0 12px rgba(139,92,246,.6)); }
+  .logo span { color: var(--accent-2); }
+  .login-card h1 { font-size: 24px; margin: 26px 0 6px; letter-spacing: -.01em; }
+  .login-card p { color: var(--muted); margin: 0 0 22px; }
+  label.lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  input, textarea, select { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; color: var(--fg); font: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,92,246,.22); }
+  .check { display: flex; align-items: center; gap: 8px; margin: 14px 0 20px; color: var(--muted); font-size: 13px; }
+  .check input { width: auto; accent-color: var(--accent); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); background: var(--card-2); border-radius: 10px; padding: 9px 14px; font-weight: 600; transition: filter .15s, background .15s, opacity .15s, transform .1s; white-space: nowrap; }
+  .btn:hover:not(:disabled) { background: var(--hover); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 8px 24px rgba(99,102,241,.35); }
+  .btn-primary:hover:not(:disabled) { background: var(--grad); filter: brightness(1.1); }
+  .w100 { width: 100%; padding: 12px; }
+  .err { color: #f87171; font-size: 13px; min-height: 20px; margin-top: 10px; }
+  .secure { display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; margin-top: 16px; }
+  .secure svg { width: 14px; height: 14px; }
+
+  /* ---------- Layout ---------- */
+  .app { display: grid; grid-template-columns: 250px 1fr; min-height: 100%; }
+  aside { background: var(--side); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 24px; position: sticky; top: 0; height: 100vh; }
+  .srv-pill { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+  .srv-pill .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--grad); display: grid; place-items: center; font-weight: 800; }
+  .srv-pill b { display: block; font-size: 13px; } .srv-pill small { color: var(--muted); font-size: 11.5px; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); display: inline-block; }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-title { font-size: 11px; font-weight: 700; color: #5d6679; text-transform: uppercase; letter-spacing: .1em; padding: 0 10px 6px; }
+  .nav button, .nav a { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: 9px; color: var(--muted); font-weight: 500; background: none; border: 0; text-align: left; width: 100%; position: relative; }
+  .nav button:hover, .nav a:hover { background: var(--card); color: var(--fg); }
+  .nav button.on { background: rgba(139,92,246,.13); color: #fff; }
+  .nav button.on::before { content: ""; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+  .nav button.on svg { color: var(--accent-2); }
+  .me { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .me .av { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #f472b6, #8b5cf6); display: grid; place-items: center; font-weight: 800; }
+  .me b { display: block; font-size: 13px; } .me small { color: var(--muted); font-size: 11px; }
+  .me button { margin-left: auto; background: none; border: 0; color: var(--muted); padding: 6px; border-radius: 7px; }
+  .me button:hover { color: #f87171; background: rgba(239,68,68,.1); }
+
+  main { padding: 0 0 40px; min-width: 0; }
+  .hero { position: relative; padding: 26px 30px 24px; border-bottom: 1px solid var(--line); overflow: hidden;
+    background: radial-gradient(500px 220px at 0% 0%, rgba(139,92,246,.22), transparent 70%), radial-gradient(500px 220px at 100% 0%, rgba(59,130,246,.14), transparent 70%); }
+  .crumbs { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .head h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+  .badge { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; border: 1px solid; }
+  .badge i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .b-online { color: #4ade80; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.1); }
+  .b-online i { box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: ring 1.8s infinite; }
+  .b-offline { color: #f87171; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.1); }
+  .b-starting { color: #facc15; border-color: rgba(234,179,8,.35); background: rgba(234,179,8,.1); }
+  .b-starting i { animation: blink .8s infinite; }
+  .b-unknown { color: var(--muted); border-color: var(--line); }
+  @keyframes ring { 70% { box-shadow: 0 0 0 7px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+  @keyframes blink { 50% { opacity: .3; } }
+  .addr { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .power { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-start { background: #16a34a; color: #fff; border-color: transparent; box-shadow: 0 8px 22px rgba(34,197,94,.25); }
+  .btn-start:hover:not(:disabled) { background: #16a34a; filter: brightness(1.12); }
+  .btn-stop { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.35); }
+  .btn-stop:hover:not(:disabled) { background: rgba(239,68,68,.2); }
+
+  .content { padding: 24px 30px 0; }
+  .view { animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+  .stat { padding: 16px 18px; position: relative; overflow: hidden; }
+  .stat .k { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .stat .k .ico { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: rgba(139,92,246,.14); color: var(--accent-2); }
+  .stat .k .ico svg { width: 15px; height: 15px; }
+  .stat .v { font-size: 26px; font-weight: 800; margin: 10px 0 10px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .stat .v small { font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+  .bar { height: 6px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--grad); transition: width .6s ease; }
+  .two { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: start; }
+  .card-h { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .card-h .sub { color: var(--muted); font-weight: 500; margin-left: auto; font-size: 13px; }
+  .info { padding: 4px 16px 10px; }
+  .row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .row:last-child { border-bottom: 0; }
+  .row span { color: var(--muted); } .row b { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+  .side-col { display: flex; flex-direction: column; gap: 14px; }
+  .players { padding: 12px 16px 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .player { display: flex; align-items: center; gap: 7px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; padding: 4px 10px 4px 4px; font-size: 13px; }
+  .player img { width: 24px; height: 24px; border-radius: 5px; image-rendering: pixelated; }
+  .empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+  .act { padding: 4px 16px 10px; max-height: 300px; overflow-y: auto; }
+  .act > div { display: flex; gap: 10px; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .act > div:last-child { border-bottom: 0; }
+  .act time { color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+  .act b { color: var(--accent-2); font-weight: 600; }
+
+  /* Konsole */
+  .term { background: #06080c; border-radius: 0 0 14px 14px; }
+  .term-out { height: 300px; overflow-y: auto; padding: 12px 14px; font: 12.5px/1.6 "JetBrains Mono", ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-word; color: #c9d1d9; }
+  .big .term-out { height: calc(100vh - 330px); min-height: 360px; }
+  .term-out .w { color: #facc15; } .term-out .e { color: #f87171; } .term-out .d { color: #6b7280; } .term-out .c { color: var(--accent-2); }
+  .term-in { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 8px 10px; }
+  .term-in span { color: var(--accent-2); font-family: "JetBrains Mono", monospace; }
+  .term-in input { border: 0; background: transparent; padding: 6px 2px; font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  .term-in input:focus { box-shadow: none; }
+
+  /* Dateien */
+  .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .path { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; font-weight: 600; margin-right: auto; min-width: 0; }
+  .path button { background: none; border: 0; padding: 4px 6px; border-radius: 6px; color: var(--muted); }
+  .path button:hover { background: var(--hover); color: var(--fg); }
+  .path button:last-child { color: var(--fg); }
+  .path i { color: #4b5466; font-style: normal; }
+  .ftable { width: 100%; border-collapse: collapse; }
+  .ftable th { text-align: left; font-size: 11.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .ftable td { padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .ftable tr:last-child td { border-bottom: 0; }
+  .ftable tbody tr:hover { background: var(--card-2); }
+  .fname { display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; }
+  .fname span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fname .fi { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex: none; }
+  .fi.dir { background: rgba(234,179,8,.13); color: #facc15; } .fi.jar { background: rgba(239,68,68,.12); color: #f87171; } .fi.txt { background: rgba(59,130,246,.13); color: #60a5fa; } .fi.bin { background: rgba(139,92,246,.13); color: var(--accent-2); }
+  .fi svg { width: 15px; height: 15px; }
+  .muted { color: var(--muted); }
+  .acts { display: flex; gap: 4px; justify-content: flex-end; }
+  .ib { background: none; border: 0; padding: 6px; border-radius: 7px; color: var(--muted); }
+  .ib:hover { background: var(--hover); color: var(--fg); }
+  .ib.danger:hover { background: rgba(239,68,68,.12); color: #f87171; }
+  .drop { position: relative; }
+  .drop.over::after { content: "Dateien hier loslassen zum Hochladen"; position: absolute; inset: 8px; border: 2px dashed var(--accent); border-radius: 12px; background: rgba(139,92,246,.12); display: grid; place-items: center; font-weight: 700; color: #fff; z-index: 3; }
+  .uploads { padding: 0 14px; }
+  .up { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .up .bar { flex: 1; }
+  .up b { font-weight: 600; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Plugins */
+  .plug-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; padding: 14px; }
+  .plug { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card-2); }
+  .plug .pi { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 16px; flex: none; }
+  .plug b { display: block; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .plug small { color: var(--muted); font-size: 12px; }
+  .plug .meta { flex: 1; min-width: 0; }
+  .plug.off { opacity: .55; }
+  .switch { position: relative; width: 38px; height: 22px; border-radius: 999px; background: #2a3242; border: 0; flex: none; transition: background .2s; }
+  .switch::after { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .switch.on { background: var(--green); } .switch.on::after { transform: translateX(16px); }
+  .tag { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(234,179,8,.15); color: #facc15; margin-left: 4px; }
+  .search { max-width: 240px; padding: 8px 12px; }
+  .hint { display: flex; gap: 10px; align-items: flex-start; margin: 0 14px 14px; padding: 12px 14px; border-radius: 10px; background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); color: #bfdbfe; font-size: 13px; }
+
+  /* Editor */
+  .modal { position: fixed; inset: 0; z-index: 60; background: rgba(3,5,9,.7); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; }
+  .modal-box { width: min(1000px, 100%); height: min(80vh, 760px); display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,.6); }
+  .modal-box textarea { flex: 1; border: 0; border-radius: 0; resize: none; background: #06080c; font: 13px/1.6 "JetBrains Mono", monospace; padding: 14px 16px; tab-size: 2; }
+  .modal-box textarea:focus { box-shadow: none; }
+  .modal-f { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 14px; border-top: 1px solid var(--line); }
+
+  .toast { position: fixed; right: 20px; bottom: 20px; z-index: 70; display: flex; gap: 10px; align-items: center; background: var(--card-2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,.5); transform: translateY(160%); transition: transform .3s cubic-bezier(.2,.9,.3,1.2); max-width: calc(100% - 40px); }
+  .toast::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none; }
+  .toast.show { transform: none; }
+  .toast.bad::before { background: var(--red); }
+  .offline-note { display: flex; gap: 12px; align-items: center; padding: 12px 16px; margin-bottom: 16px; border-radius: 12px; background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.3); color: #fde68a; font-size: 13px; }
+
+  .menu-btn { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 7px; }
+  @media (max-width: 1100px) { .grid4 { grid-template-columns: repeat(2, 1fr); } .two { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 50; transform: translateX(-100%); transition: transform .25s; }
+    aside.open { transform: none; box-shadow: 0 0 80px rgba(0,0,0,.7); }
+    .menu-btn { display: block; }
+    .hero { padding: 18px 16px; } .content { padding: 16px 16px 0; }
+    .power { margin-left: 0; width: 100%; } .power .btn { flex: 1; }
+    .grid4 { gap: 10px; } .stat .v { font-size: 22px; }
+    .hide-m { display: none; }
+    .ftable td, .ftable th { padding: 9px 10px; }
+    .search { max-width: none; flex: 1; }
+  }
+  .codeval { font: 600 18px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .04em; background: var(--bg); border: 1px dashed var(--accent); border-radius: 10px; padding: 14px; text-align: center; user-select: all; word-break: break-all; }
+  .role { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .role.owner { background: rgba(239,68,68,.14); color: #fca5a5; }
+  .role.coowner { background: rgba(139,92,246,.16); color: var(--accent-2); }
+  select.search { appearance: auto; }
+  .perm-wrap { padding: 0 16px 14px; }
+  .perm-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+  .perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .perm { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; font-size: 13px; user-select: none; transition: border-color .15s, background .15s; }
+  .perm input { width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+  .perm:has(input:checked) { border-color: rgba(139,92,246,.55); background: rgba(139,92,246,.08); }
+  .ptags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .ptag { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--line); color: var(--muted); }
+  .no-perm { opacity: .4; pointer-events: none; }
+  .plan-box { margin-top: 18px; padding: 12px; border-radius: 12px; border: 1px solid rgba(139,92,246,.35); background: linear-gradient(160deg, rgba(139,92,246,.16), rgba(59,130,246,.06)); display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; }
+  .plan-box b { font-size: 13.5px; } .plan-box span { color: var(--muted); } .plan-box em { font-style: normal; color: var(--accent-2); font-weight: 600; margin-top: 4px; }
+  .addr-btn { background: var(--card-2); border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 3px 10px; font: 600 12.5px "JetBrains Mono", monospace; cursor: pointer; }
+  .addr-btn:hover { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24"><path d="m4 17 6-5-6-5M12 19h8"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5M9 8V2M15 8V2M6 8h12v4a6 6 0 0 1-12 0z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l-5-5 5-5M5 12h11"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></symbol>
+  <symbol id="i-ram" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11v2M10 11v2M14 11v2M18 11v2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-logo" viewBox="0 0 32 32"><path d="M16 2 28 9v14L16 30 4 23V9z" fill="#8b5cf6" stroke="none"/><path d="M16 8l6 4v8l-6 4-6-4v-8z" fill="#c4b5fd" stroke="none"/></symbol>
+</svg>
+
+<!-- ================= Login ================= -->
+<section class="login" id="loginView">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <div class="logo"><svg><use href="#i-logo"/></svg><div>Crystal<span>Host</span></div></div>
+    <h1>Willkommen zurück 👋</h1>
+    <p>Melde dich mit deinem Server-Code an (beginnt mit <b>CH-</b>). Deinen Owner-Code hat dir das Setup am Ende angezeigt – er steht auch in <b>ZUGANG.txt</b> in deinem CrystalHost-Ordner.</p>
+    <label class="lbl" for="keyInput">Zugangsschlüssel</label>
+    <input id="keyInput" type="password" placeholder="CH-XXXXXXXXXXXX-…" required>
+    <label class="check"><input type="checkbox" id="remember" checked> Auf diesem Gerät angemeldet bleiben</label>
+    <button class="btn btn-primary w100" id="loginBtn" type="submit">Anmelden</button>
+    <div class="err" id="loginErr"></div>
+    <div class="secure"><svg class="i"><use href="#i-lock"/></svg>Verschlüsselte Verbindung · nur für freigeschaltete Nutzer</div>
+  </form>
+</section>
+
+<!-- ================= Panel ================= -->
+<div class="app" id="appView" hidden>
+  <aside id="sidebar">
+    <div class="logo"><svg><use href="#i-logo"/></svg><div>Crystal<span>Host</span></div></div>
+    <div class="srv-pill"><div class="ic" id="srvIc">S</div><div><b id="srvName">Server</b><small><span class="dot" id="pillDot"></span><span id="pillText">verbinde…</span></small></div></div>
+    <nav class="nav" id="nav">
+      <div class="nav-title">Verwaltung</div>
+      <button data-view="overview" class="on"><svg class="i"><use href="#i-grid"/></svg>Übersicht</button>
+      <button data-view="console"><svg class="i"><use href="#i-term"/></svg>Konsole</button>
+      <button data-view="files"><svg class="i"><use href="#i-folder"/></svg>Dateien</button>
+      <button data-view="plugins"><svg class="i"><use href="#i-plug"/></svg>Plugins</button>
+      <button data-view="activity"><svg class="i"><use href="#i-clock"/></svg>Aktivität</button>
+      <button data-view="users" id="navUsers" hidden><svg class="i"><use href="#i-lock"/></svg>Zugänge</button>
+      <div class="plan-box"><b>Free-Plan</b><span>1 Server · eigener PC</span><em>Premium kommt bald ✨</em></div>
+    </nav>
+    <div class="me"><div class="av" id="meAv">?</div><div><b id="meName">–</b><small id="meRole">–</small></div>
+      <button id="logout" type="button" title="Abmelden" aria-label="Abmelden"><svg class="i"><use href="#i-out"/></svg></button></div>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div class="crumbs" id="crumbs">Server › Übersicht</div>
+      <div class="head">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Menü"><svg class="i"><use href="#i-menu"/></svg></button>
+        <h2 id="srvTitle">Server</h2>
+        <span class="badge b-unknown" id="stateBadge"><i></i><span id="stateText">verbinde…</span></span>
+        <div class="power">
+          <button class="btn btn-start" id="startBtn" type="button" disabled><svg class="i"><use href="#i-play"/></svg>Starten</button>
+          <button class="btn" id="restartBtn" type="button" disabled><svg class="i"><use href="#i-restart"/></svg>Neustart</button>
+          <button class="btn btn-stop" id="stopBtn" type="button" disabled><svg class="i"><use href="#i-stop"/></svg>Stoppen</button>
+        </div>
+      </div>
+      <div class="addr" id="addrLine"><span>Adresse für Freunde:</span> <button class="addr-btn" id="addrBtn" type="button" title="Kopieren">wird ermittelt …</button> <span class="muted" id="localAddr"></span></div>
+    </div>
+
+    <div class="content">
+      <div class="offline-note" id="panelOff" hidden>⚠️ Das Panel auf dem Server-PC ist gerade nicht erreichbar. Läuft der PC und der Watchdog?</div>
+
+      <!-- Übersicht -->
+      <div class="view" data-view="overview">
+        <div class="grid4">
+          <div class="card stat"><div class="k"><span class="ico"><svg class="i"><use href="#i-cpu"/></svg></span>CPU</div><div class="v" id="cpu">–</div><div class="bar"><span id="cpuBar"></span></div></div>
+          <div class="card stat"><div class="k"><span class="ico"><svg class="i"><use href="#i-ram"/></svg></span>Arbeitsspeicher</div><div class="v" id="ram">–</div><div class="bar"><span id="ramBar"></span></div></div>
+          <div class="card stat"><div class="k"><span class="ico"><svg class="i"><use href="#i-users"/></svg></span>Spieler</div><div class="v" id="players">–</div><div class="bar"><span id="playersBar"></span></div></div>
+          <div class="card stat"><div class="k"><span class="ico"><svg class="i"><use href="#i-pulse"/></svg></span>TPS</div><div class="v" id="tps">–</div><div class="bar"><span id="tpsBar"></span></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><div class="card-h">Konsole <span class="sub">live</span></div><div class="term"><div class="term-out" id="termMini"></div></div></div>
+          <div class="side-col">
+            <div class="card"><div class="card-h">Server-Details</div>
+              <div class="info">
+                <div class="row"><span>Status</span><b id="dState">–</b></div>
+                <div class="row"><span>Version</span><b id="dVersion">–</b></div>
+                <div class="row"><span>Laufzeit</span><b id="dUptime">–</b></div>
+                <div class="row"><span>Java-Speicher</span><b id="dHeap">–</b></div>
+                <div class="row"><span>Panel von unterwegs</span><b id="dPanel">–</b></div>
+              </div>
+            </div>
+            <div class="card"><div class="card-h">Online <span class="sub" id="onlineCount"></span></div><div class="players" id="playerList"><span class="empty">Niemand online</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Konsole -->
+      <div class="view" data-view="console" hidden>
+        <div class="card big"><div class="card-h">Konsole <span class="sub">Befehle ohne „/“ eingeben</span></div>
+          <div class="term"><div class="term-out" id="termOut"><span class="d">Verbinde mit der Konsole …</span></div>
+            <form class="term-in" id="cmdForm" autocomplete="off"><span>$</span><input id="cmdInput" placeholder="z. B. say Hallo oder lp user Name parent add vip" aria-label="Konsolenbefehl"><button class="btn" type="submit">Senden</button></form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dateien -->
+      <div class="view" data-view="files" hidden>
+        <div class="card drop" id="fileDrop">
+          <div class="toolbar">
+            <div class="path" id="pathBar"></div>
+            <button class="btn" id="refreshFiles" type="button" title="Neu laden"><svg class="i"><use href="#i-refresh"/></svg></button>
+            <button class="btn" id="newFolder" type="button"><svg class="i"><use href="#i-plus"/></svg><span class="hide-m">Ordner</span></button>
+            <button class="btn" id="newFile" type="button"><svg class="i"><use href="#i-file"/></svg><span class="hide-m">Datei</span></button>
+            <button class="btn btn-primary" id="uploadBtn" type="button"><svg class="i"><use href="#i-upload"/></svg>Hochladen</button>
+            <input type="file" id="fileInput" multiple hidden>
+          </div>
+          <div class="uploads" id="uploads"></div>
+          <table class="ftable">
+            <thead><tr><th>Name</th><th class="hide-m">Größe</th><th class="hide-m">Geändert</th><th></th></tr></thead>
+            <tbody id="fileRows"><tr><td colspan="4" class="muted">Lade …</td></tr></tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin:10px 2px">Tipp: Dateien einfach in die Liste ziehen. Gelöschtes landet im Papierkorb auf dem Server-PC (<code>.papierkorb</code>), beim Bearbeiten wird die alte Version dort gesichert.</p>
+      </div>
+
+      <!-- Plugins -->
+      <div class="view" data-view="plugins" hidden>
+        <div class="card drop" id="plugDrop">
+          <div class="toolbar">
+            <div class="path"><b style="padding:4px 6px">Plugins</b><span class="muted" id="plugCount" style="font-weight:500"></span></div>
+            <input class="search" id="plugSearch" placeholder="Suchen …" aria-label="Plugins durchsuchen">
+            <button class="btn btn-primary" id="plugUpload" type="button"><svg class="i"><use href="#i-upload"/></svg>Plugin hochladen</button>
+            <input type="file" id="plugInput" accept=".jar" multiple hidden>
+          </div>
+          <div class="uploads" id="plugUploads"></div>
+          <div class="hint" style="margin-top:14px">ℹ️ Neue oder ausgetauschte Plugins und An/Aus-Schalter wirken nach einem <b>Neustart</b>. Läuft der Server, legt das Panel ersetzte Plugins automatisch in <code>plugins/update</code> – Paper tauscht sie beim Start sauber aus.</div>
+          <div class="plug-grid" id="plugGrid"></div>
+        </div>
+      </div>
+
+      <!-- Zugänge (nur Owner) -->
+      <div class="view" data-view="users" hidden>
+        <div class="card">
+          <div class="card-h">Zugänge <span class="sub">nur du als Owner kannst Login-Codes erstellen</span></div>
+          <form class="toolbar" id="userForm" autocomplete="off">
+            <input class="search" id="userName" placeholder="Name (z. B. dein Freund)" maxlength="24" required aria-label="Name">
+            <select class="search" id="userRole" aria-label="Rolle" style="flex:0 0 auto"><option value="coowner">Co-Owner</option><option value="owner">Owner</option></select>
+            <button class="btn btn-primary" type="submit"><svg class="i"><use href="#i-plus"/></svg>Code erstellen</button>
+          </form>
+          <div class="perm-wrap" id="newPermWrap"><div class="perm-title">Was darf dieser Code?</div><div class="perm-grid" id="newPerms"></div></div>
+          <table class="ftable">
+            <thead><tr><th>Name</th><th>Rolle &amp; Rechte</th><th class="hide-m">Erstellt</th><th></th></tr></thead>
+            <tbody id="userRows"></tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin:10px 2px">Co-Owner dürfen alles außer Zugänge verwalten. Ein Code wird nur <b>einmal</b> angezeigt – verlorene Codes einfach neu erzeugen.</p>
+      </div>
+
+      <!-- Aktivität -->
+      <div class="view" data-view="activity" hidden>
+        <div class="card"><div class="card-h">Aktivität <span class="sub">wer hat was gemacht</span></div><div class="act" id="actList" style="max-height:none"><div class="empty">Noch nichts passiert.</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Editor -->
+<div class="modal" id="editor" hidden>
+  <div class="modal-box">
+    <div class="card-h"><svg class="i"><use href="#i-edit"/></svg><span id="edName">Datei</span><span class="sub" id="edInfo"></span></div>
+    <textarea id="edText" spellcheck="false" aria-label="Dateiinhalt"></textarea>
+    <div class="modal-f"><button class="btn" id="edClose" type="button">Schließen</button><button class="btn btn-primary" id="edSave" type="button">Speichern</button></div>
+  </div>
+</div>
+
+<div class="modal" id="permBox" hidden>
+  <div class="modal-box" style="max-width:480px;height:auto">
+    <div class="card-h"><svg class="i"><use href="#i-lock"/></svg>Rechte von <span id="permFor" style="margin-left:4px"></span></div>
+    <div style="padding:16px 18px"><div class="perm-grid" id="editPerms"></div></div>
+    <div class="modal-f"><button class="btn" id="permCancel" type="button">Abbrechen</button><button class="btn btn-primary" id="permSave" type="button">Speichern</button></div>
+  </div>
+</div>
+
+<div class="modal" id="codeBox" hidden>
+  <div class="modal-box" style="max-width:460px;height:auto">
+    <div class="card-h"><svg class="i"><use href="#i-lock"/></svg>Neuer Login-Code</div>
+    <div style="padding:18px">
+      <p class="muted" style="margin:0 0 12px">Code für <b id="codeFor"></b> – gib ihn nur per Privatnachricht weiter. Er wird nicht noch einmal angezeigt.</p>
+      <div class="codeval" id="codeVal"></div>
+    </div>
+    <div class="modal-f"><button class="btn" id="codeCopy" type="button">Kopieren</button><button class="btn btn-primary" id="codeOk" type="button">Fertig</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
+  const icon = (name, cls) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', 'i' + (cls ? ' ' + cls : '')); const u = document.createElementNS('http://www.w3.org/2000/svg', 'use'); u.setAttribute('href', '#i-' + name); s.append(u); return s; };
+  const store = {
+    get(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k); } catch { return null; } },
+    set(k, v, persist) { try { (persist ? localStorage : sessionStorage).setItem(k, v); } catch {} },
+    clear(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch {} }
+  };
+  let API = '', token = store.get('ch_token'), me = store.get('ch_name') || '', consolePos = 0, state = 'unknown', fails = 0, view = 'overview', cwd = '';
+
+  function toast(msg, bad) { const t = $('toast'); t.textContent = msg; t.className = 'toast show' + (bad ? ' bad' : ''); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 3800); }
+  const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : b < 1073741824 ? (b / 1048576).toFixed(1) + ' MB' : (b / 1073741824).toFixed(2) + ' GB';
+  const fmtDate = t => new Date(t).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+  // ---------- Verbindung ----------
+  // Panel-Adresse finden:
+  //  1. Seite kommt direkt vom eigenen PC (lokal oder ueber den Tunnel) -> gleiche Adresse
+  //  2. Seite auf der CrystalHost-Website -> Server-ID aus dem Login-Code, Adresse steht unter ntfy.sh/crystalhost-<ID>
+  const serverIdOf = code => { const m = /^CH-([0-9A-F]{12})-/i.exec((code || '').trim()); return m ? m[1].toLowerCase() : ''; };
+  const ping = api => fetch(api + '/api/ping', { cache: 'no-store' }).then(r => r.ok).catch(() => false);
+  async function discover(code) {
+    if (!location.hostname.endsWith('github.io') && await ping('')) { API = ''; return true; }
+    const saved = store.get('ch_api');
+    if (saved && await ping(saved)) { API = saved; return true; }
+    const sid = serverIdOf(code) || store.get('ch_sid') || '';
+    if (!sid) return false;
+    try {
+      const r = await fetch(`https://ntfy.sh/crystalhost-${sid}/json?poll=1&since=24h`, { cache: 'no-store' });
+      const lines = (await r.text()).trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(m => m && m.event === 'message');
+      for (const m of lines.reverse()) {
+        const api = (m.message || '').trim().replace(/\/$/, '');
+        if (/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(api) && await ping(api)) {
+          API = api; store.set('ch_api', api, true); store.set('ch_sid', sid, true); return true;
+        }
+      }
+    } catch {}
+    return false;
+  }
+  async function call(path, opts = {}) {
+    const r = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) } });
+    if (r.status === 401) { logout(true); throw new Error('Sitzung abgelaufen'); }
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Fehler ' + r.status);
+    return d;
+  }
+  const post = (path, body) => call(path, { method: 'POST', body: JSON.stringify(body || {}) });
+
+  // ---------- Login ----------
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('loginErr').textContent = ''; $('loginBtn').disabled = true; $('loginBtn').textContent = 'Prüfe …';
+    try {
+      const code = $('keyInput').value.trim();
+      if (location.hostname.endsWith('github.io') && !serverIdOf(code) && !store.get('ch_sid')) throw new Error('Das ist kein CrystalHost-Code (er beginnt mit CH-…).');
+      if (!API && !(await discover(code))) throw new Error('Dein Server ist gerade nicht erreichbar – ist der PC an und CrystalHost gestartet?');
+      const d = await post('/api/login', { key: code });
+      token = d.token; me = d.name; role = d.role;
+      store.set('ch_token', token, $('remember').checked); store.set('ch_name', me, $('remember').checked); store.set('ch_role', role, $('remember').checked);
+      $('keyInput').value = ''; showApp();
+    } catch (err) { $('loginErr').textContent = err.message; }
+    finally { $('loginBtn').disabled = false; $('loginBtn').textContent = 'Anmelden'; }
+  });
+  function logout(expired) {
+    if (token && !expired) post('/api/logout').catch(() => {});
+    token = null; role = ''; store.clear('ch_token'); store.clear('ch_name'); store.clear('ch_role');
+    if (!expired) { store.clear('ch_api'); store.clear('ch_sid'); API = ''; }
+    $('appView').hidden = true; $('loginView').hidden = false;
+    if (expired) $('loginErr').textContent = 'Bitte erneut anmelden.';
+  }
+  $('logout').onclick = () => logout(false);
+
+  // ---------- Navigation ----------
+  const TITLES = { overview: 'Übersicht', console: 'Konsole', files: 'Dateien', plugins: 'Plugins', activity: 'Aktivität', users: 'Zugänge' };
+  let role = store.get('ch_role') || '';
+  let myPerms = new Set();
+  const can = p => role === 'owner' || myPerms.has(p);
+  function go(v) {
+    view = v;
+    document.querySelectorAll('.view').forEach(x => x.hidden = x.dataset.view !== v);
+    document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+    $('crumbs').textContent = 'Server › ' + TITLES[v];
+    $('sidebar').classList.remove('open');
+    try { location.hash = v; } catch {}
+    if (v === 'files') loadFiles(cwd);
+    if (v === 'plugins') loadPlugins();
+    if (v === 'users') loadUsers();
+    if (v === 'console') { const o = $('termOut'); o.scrollTop = o.scrollHeight; $('cmdInput').focus(); }
+  }
+  document.querySelectorAll('#nav button').forEach(b => b.onclick = () => go(b.dataset.view));
+  $('menuBtn').onclick = () => $('sidebar').classList.toggle('open');
+
+  // ---------- Steuerung ----------
+  async function power(action, confirmText) {
+    if (confirmText && !confirm(confirmText)) return;
+    ['startBtn', 'restartBtn', 'stopBtn'].forEach(id => $(id).disabled = true);
+    try { toast((await post('/api/' + action)).message); } catch (err) { toast(err.message, true); }
+    setTimeout(pollStatus, 1500);
+  }
+  $('startBtn').onclick = () => power('start');
+  $('restartBtn').onclick = () => power('restart', 'Server wirklich neu starten? Alle Spieler werden kurz getrennt.');
+  $('stopBtn').onclick = () => power('stop', 'Server wirklich stoppen? Er startet wieder, sobald jemand joinen will oder ihr auf „Starten“ klickt.');
+  $('cmdForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const cmd = $('cmdInput').value.trim(); if (!cmd) return;
+    $('cmdInput').value = '';
+    addLines(['> /' + cmd.replace(/^\//, '')], 'c');
+    try { const d = await post('/api/command', { command: cmd }); if (d.output) addLines(d.output.trim().split('\n'), 'd'); } catch (err) { toast(err.message, true); }
+  });
+
+  // ---------- Übersicht ----------
+  const LABEL = { online: 'Online', offline: 'Offline', starting: 'Startet …', unknown: 'Unbekannt' };
+  const DOT = { online: 'var(--green)', offline: 'var(--red)', starting: 'var(--yellow)', unknown: 'var(--muted)' };
+  const fmtUp = s => { if (!s) return '–'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); return d ? `${d} T ${h} Std` : h ? `${h} Std ${m} Min` : `${m} Min`; };
+  function setBar(id, pct, color) { const b = $(id); b.style.width = Math.max(0, Math.min(100, pct)) + '%'; b.style.background = color || ''; }
+  function setV(id, main, small) { const v = $(id); v.replaceChildren(String(main)); if (small) v.append(el('small', null, small)); }
+  function render(s) {
+    state = s.state;
+    $('stateBadge').className = 'badge b-' + state; $('stateText').textContent = LABEL[state];
+    $('pillDot').style.background = DOT[state]; $('pillText').textContent = LABEL[state];
+    $('dState').textContent = LABEL[state];
+    $('startBtn').disabled = state !== 'offline'; $('restartBtn').disabled = state !== 'online'; $('stopBtn').disabled = state === 'offline';
+    const r = s.resources;
+    r ? setV('cpu', r.cpu, ' %') : setV('cpu', '–'); setBar('cpuBar', r ? r.cpu : 0, r && r.cpu > 85 ? 'var(--red)' : '');
+    const maxRam = s.ramMax || 4096; r ? setV('ram', (r.ramMb / 1024).toFixed(1), ` / ${(maxRam / 1024).toFixed(1)} GB`) : setV('ram', '–'); setBar('ramBar', r ? r.ramMb / maxRam * 100 : 0);
+    s.online != null ? setV('players', s.online, ` / ${s.max}`) : setV('players', '–'); setBar('playersBar', s.online != null ? s.online / s.max * 100 : 0);
+    const tps = s.tps;
+    tps != null ? setV('tps', tps.toFixed(1), ' / 20') : setV('tps', '–');
+    setBar('tpsBar', tps != null ? tps / 20 * 100 : 0, tps == null ? '' : tps >= 18 ? 'var(--green)' : tps >= 14 ? 'var(--yellow)' : 'var(--red)');
+    $('dVersion').textContent = s.version ? 'Paper ' + s.version : '–';
+    if (s.name) { $('srvName').textContent = s.name; $('srvTitle').textContent = s.name; $('srvIc').textContent = s.name[0].toUpperCase(); document.title = s.name + ' · CrystalHost'; }
+    $('addrBtn').textContent = s.address || (state === 'online' ? 'wird ermittelt …' : 'Server ist aus');
+    $('addrBtn').dataset.addr = s.address || '';
+    $('localAddr').textContent = s.localAddress ? `· im eigenen WLAN: ${s.localAddress}` : '';
+    $('dUptime').textContent = fmtUp(s.uptime);
+    $('dHeap').textContent = s.ramMax ? `${(s.ramMax / 1024).toFixed(1)} GB zugewiesen` : '–';
+    $('dPanel').textContent = s.panelUrl ? s.panelUrl.replace('https://', '') : 'nur lokal';
+    const list = s.players || [];
+    $('onlineCount').textContent = list.length || '';
+    $('playerList').replaceChildren(...(list.length ? list.map(n => { const p = el('div', 'player'); const i = el('img'); i.src = `https://mc-heads.net/avatar/${encodeURIComponent(n)}/48`; i.alt = ''; p.append(i, el('span', null, n)); return p; }) : [el('span', 'empty', state === 'online' ? 'Niemand online' : 'Server ist nicht online')]));
+    const act = (s.activity || []).slice().reverse();
+    $('actList').replaceChildren(...(act.length ? act.map(a => { const d = el('div'); d.append(el('time', null, new Date(a.t).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))); const t = el('span'); t.append(el('b', null, a.user), ' ' + a.action); d.append(t); return d; }) : [el('div', 'empty', 'Noch nichts passiert.')]));
+  }
+
+  $('addrBtn').onclick = async () => { const a = $('addrBtn').dataset.addr; if (!a) return; try { await navigator.clipboard.writeText(a); toast('Adresse kopiert: ' + a); } catch { prompt('Adresse:', a); } };
+
+  // ---------- Konsole ----------
+  function lineEl(l, cls) { return el('div', cls || (/\bWARN\b/.test(l) ? 'w' : /\bERROR\b|Exception/.test(l) ? 'e' : null), l); }
+  function addLines(lines, cls) {
+    for (const out of [$('termOut'), $('termMini')]) {
+      const atBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 40;
+      for (const l of lines) out.append(lineEl(l, cls));
+      while (out.children.length > 600) out.firstChild.remove();
+      if (atBottom) out.scrollTop = out.scrollHeight;
+    }
+  }
+  async function pollStatus() {
+    if (!token) return;
+    try { render(await call('/api/status')); fails = 0; $('panelOff').hidden = true; }
+    catch { if (++fails >= 2) { $('panelOff').hidden = false; $('stateBadge').className = 'badge b-unknown'; $('stateText').textContent = 'keine Verbindung'; } if (fails % 5 === 0) discover(); }
+  }
+  async function pollConsole() {
+    if (!token) return;
+    try {
+      const d = await call('/api/console?since=' + consolePos);
+      if (consolePos === 0) { $('termOut').replaceChildren(); $('termMini').replaceChildren(); }
+      else if (d.pos < consolePos) addLines(['— neues Log (Server neu gestartet) —'], 'd');
+      consolePos = d.pos; addLines(d.lines);
+    } catch {}
+  }
+
+  // ---------- Dateien ----------
+  function fileKind(f) { if (f.dir) return ['dir', 'folder']; if (/\.jar$/i.test(f.name)) return ['jar', 'plug']; if (f.text) return ['txt', 'file']; return ['bin', 'file']; }
+  function renderPath() {
+    const parts = cwd ? cwd.split('/') : [];
+    const bar = $('pathBar'); bar.replaceChildren();
+    const root = el('button', null, 'Server'); root.onclick = () => loadFiles(''); bar.append(root);
+    parts.forEach((p, i) => { bar.append(el('i', null, '/')); const b = el('button', null, p); b.onclick = () => loadFiles(parts.slice(0, i + 1).join('/')); bar.append(b); });
+  }
+  async function loadFiles(path) {
+    try {
+      const d = await call('/api/files?path=' + encodeURIComponent(path));
+      cwd = d.path; renderPath();
+      const rows = [];
+      if (cwd) { const tr = el('tr'); const td = el('td'); td.colSpan = 4; const n = el('div', 'fname'); const fi = el('span', 'fi dir'); fi.append(icon('folder')); n.append(fi, el('span', 'muted', '.. (zurück)')); n.onclick = () => loadFiles(cwd.split('/').slice(0, -1).join('/')); td.append(n); tr.append(td); rows.push(tr); }
+      for (const f of d.items) {
+        const p = (cwd ? cwd + '/' : '') + f.name;
+        const tr = el('tr'); const [kind, ic] = fileKind(f);
+        const n = el('div', 'fname'); const fi = el('span', 'fi ' + kind); fi.append(icon(ic)); n.append(fi, el('span', null, f.name));
+        n.onclick = () => f.dir ? loadFiles(p) : f.text ? openEditor(p) : download(p, f.name);
+        const td1 = el('td'); td1.append(n);
+        const acts = el('div', 'acts');
+        const btn = (ic, title, fn, danger) => { const b = el('button', 'ib' + (danger ? ' danger' : '')); b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.append(icon(ic)); b.onclick = e => { e.stopPropagation(); fn(); }; acts.append(b); };
+        if (f.text) btn('edit', 'Bearbeiten', () => openEditor(p));
+        if (!f.dir) btn('download', 'Herunterladen', () => download(p, f.name));
+        btn('refresh', 'Umbenennen', () => renameItem(p, f.name));
+        btn('trash', 'Löschen', () => deleteItem(p, f.name), true);
+        const td4 = el('td'); td4.append(acts);
+        tr.append(td1, el('td', 'muted hide-m', f.dir ? '—' : fmtSize(f.size)), el('td', 'muted hide-m', fmtDate(f.mtime)), td4);
+        rows.push(tr);
+      }
+      if (!d.items.length) { const tr = el('tr'); const td = el('td', 'muted', 'Dieser Ordner ist leer – zieh Dateien hierher.'); td.colSpan = 4; tr.append(td); rows.push(tr); }
+      $('fileRows').replaceChildren(...rows);
+    } catch (err) { toast(err.message, true); }
+  }
+  async function download(path, name) {
+    try {
+      toast('Download startet …');
+      const r = await fetch(API + '/api/file/download?path=' + encodeURIComponent(path), { headers: { Authorization: 'Bearer ' + token } });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Download fehlgeschlagen');
+      const a = el('a'); a.href = URL.createObjectURL(await r.blob()); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch (err) { toast(err.message, true); }
+  }
+  async function renameItem(path, name) {
+    const to = prompt('Neuer Name:', name); if (!to || to === name) return;
+    try { toast((await post('/api/file/rename', { path, to })).message); loadFiles(cwd); } catch (err) { toast(err.message, true); }
+  }
+  async function deleteItem(path, name) {
+    if (!confirm(`„${name}“ löschen? (landet im Papierkorb auf dem Server-PC)`)) return;
+    try { toast((await post('/api/file/delete', { path })).message); loadFiles(cwd); } catch (err) { toast(err.message, true); }
+  }
+  $('newFolder').onclick = async () => { const n = prompt('Name des neuen Ordners:'); if (!n) return; try { toast((await post('/api/file/mkdir', { path: (cwd ? cwd + '/' : '') + n })).message); loadFiles(cwd); } catch (err) { toast(err.message, true); } };
+  $('newFile').onclick = async () => { const n = prompt('Name der neuen Datei (z. B. config.yml):'); if (!n) return; try { await post('/api/file/text', { path: (cwd ? cwd + '/' : '') + n, content: '' }); loadFiles(cwd); openEditor((cwd ? cwd + '/' : '') + n); } catch (err) { toast(err.message, true); } };
+  $('refreshFiles').onclick = () => loadFiles(cwd);
+
+  // Upload mit Fortschritt (XHR, damit der Balken echt ist)
+  function upload(file, dir, box) {
+    return new Promise(resolve => {
+      const row = el('div', 'up'); const name = el('b', null, file.name); const bar = el('div', 'bar'); const fill = el('span'); bar.append(fill); const pct = el('span', 'muted', '0 %');
+      row.append(name, bar, pct); box.append(row);
+      if (file.size > 95 * 1048576) { pct.textContent = 'zu groß (max. 95 MB)'; fill.style.background = 'var(--red)'; fill.style.width = '100%'; return resolve(false); }
+      const x = new XMLHttpRequest();
+      x.open('POST', `${API}/api/upload?path=${encodeURIComponent(dir)}&name=${encodeURIComponent(file.name)}`);
+      x.setRequestHeader('Authorization', 'Bearer ' + token);
+      x.setRequestHeader('Content-Type', 'application/octet-stream');
+      x.upload.onprogress = e => { if (e.lengthComputable) { const p = Math.round(e.loaded / e.total * 100); fill.style.width = p + '%'; pct.textContent = p + ' %'; } };
+      x.onload = () => {
+        let d = {}; try { d = JSON.parse(x.responseText); } catch {}
+        const ok = x.status === 200;
+        fill.style.width = '100%'; fill.style.background = ok ? 'var(--green)' : 'var(--red)';
+        pct.textContent = ok ? '✓' : (d.error || 'Fehler');
+        toast(ok ? d.message : (d.error || 'Upload fehlgeschlagen'), !ok);
+        setTimeout(() => row.remove(), ok ? 4000 : 9000);
+        resolve(ok);
+      };
+      x.onerror = () => { pct.textContent = 'Verbindung abgebrochen'; fill.style.background = 'var(--red)'; resolve(false); };
+      x.send(file);
+    });
+  }
+  async function uploadAll(files, dir, box, after) { for (const f of files) await upload(f, dir, box); after(); }
+  $('uploadBtn').onclick = () => $('fileInput').click();
+  $('fileInput').onchange = e => { uploadAll([...e.target.files], cwd, $('uploads'), () => loadFiles(cwd)); e.target.value = ''; };
+  function dropZone(zone, handler) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+    zone.addEventListener('dragleave', e => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('over'); });
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('over'); handler([...e.dataTransfer.files]); });
+  }
+  dropZone($('fileDrop'), files => uploadAll(files, cwd, $('uploads'), () => loadFiles(cwd)));
+
+  // Editor
+  let edPath = '';
+  async function openEditor(path) {
+    try {
+      const d = await call('/api/file/text?path=' + encodeURIComponent(path));
+      edPath = path; $('edName').textContent = path.split('/').pop(); $('edInfo').textContent = path; $('edText').value = d.content;
+      $('editor').hidden = false; $('edText').focus();
+    } catch (err) { toast(err.message, true); }
+  }
+  $('edClose').onclick = () => { $('editor').hidden = true; };
+  $('edSave').onclick = async () => { try { toast((await post('/api/file/text', { path: edPath, content: $('edText').value })).message); $('editor').hidden = true; if (view === 'files') loadFiles(cwd); } catch (err) { toast(err.message, true); } };
+  $('edText').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); $('edSave').click(); }
+    if (e.key === 'Tab') { e.preventDefault(); const t = e.target, s = t.selectionStart; t.setRangeText('  ', s, t.selectionEnd, 'end'); }
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') $('editor').hidden = true; });
+
+  // ---------- Plugins ----------
+  const COLORS = ['#8b5cf6', '#3b82f6', '#22c55e', '#eab308', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
+  let plugList = [];
+  function renderPlugins() {
+    const q = $('plugSearch').value.toLowerCase();
+    const list = plugList.filter(p => p.file.toLowerCase().includes(q));
+    $('plugCount').textContent = `${plugList.filter(p => p.enabled).length} aktiv · ${plugList.filter(p => !p.enabled).length} aus`;
+    $('plugGrid').replaceChildren(...(list.length ? list.map(p => {
+      const name = p.file.replace(/\.jar$/i, '').replace(/[-_ ](v?\d[\w.+-]*|\(\d+\))$/i, '');
+      const c = el('div', 'plug' + (p.enabled ? '' : ' off'));
+      const ic = el('div', 'pi', name[0].toUpperCase()); const col = COLORS[[...name].reduce((a, ch) => a + ch.charCodeAt(0), 0) % COLORS.length];
+      ic.style.background = col + '22'; ic.style.color = col;
+      const meta = el('div', 'meta'); const b = el('b', null, name); if (p.update) b.append(el('span', 'tag', 'Update'));
+      meta.append(b, el('small', null, `${p.file} · ${fmtSize(p.size)}`));
+      const sw = el('button', 'switch' + (p.enabled ? ' on' : '')); sw.type = 'button'; sw.title = p.enabled ? 'Deaktivieren' : 'Aktivieren'; sw.setAttribute('aria-label', sw.title);
+      sw.onclick = async () => { try { toast((await post('/api/plugins/toggle', { file: p.file, enable: !p.enabled })).message); loadPlugins(); } catch (err) { toast(err.message, true); } };
+      c.append(ic, meta, sw); return c;
+    }) : [el('div', 'empty', 'Keine Plugins gefunden.')]));
+  }
+  async function loadPlugins() { try { plugList = (await call('/api/plugins')).plugins; renderPlugins(); } catch (err) { toast(err.message, true); } }
+  $('plugSearch').oninput = renderPlugins;
+  $('plugUpload').onclick = () => $('plugInput').click();
+  $('plugInput').onchange = e => { uploadAll([...e.target.files].filter(f => /\.jar$/i.test(f.name)), 'plugins', $('plugUploads'), loadPlugins); e.target.value = ''; };
+  dropZone($('plugDrop'), files => { const jars = files.filter(f => /\.jar$/i.test(f.name)); if (jars.length < files.length) toast('Nur .jar-Dateien sind Plugins', true); uploadAll(jars, 'plugins', $('plugUploads'), loadPlugins); });
+
+  // ---------- Rechte anwenden (Navigation & Knöpfe ausblenden) ----------
+  const PERM_SHORT = { power: 'Start/Stop', console: 'Konsole', command: 'Befehle', files: 'Dateien', files_edit: 'Dateien ändern', plugins: 'Plugins' };
+  function applyPerms() {
+    const show = (sel, ok) => document.querySelectorAll(sel).forEach(e => e.hidden = !ok);
+    show('#nav button[data-view="console"]', can('console') || can('command'));
+    show('#nav button[data-view="files"]', can('files'));
+    show('#nav button[data-view="plugins"]', can('plugins'));
+    show('.power', can('power'));
+    show('#cmdForm', can('command'));
+    show('#newFolder, #newFile, #uploadBtn', can('files_edit'));
+    show('#plugUpload', can('plugins'));
+    const mini = document.querySelector('[data-view="overview"] .two > .card'); if (mini) mini.hidden = !can('console');
+    const need = { console: can('console') || can('command'), files: can('files'), plugins: can('plugins'), users: role === 'owner' };
+    if (view in need && !need[view]) go('overview');
+  }
+  function permBoxes(box, selected, names) {
+    box.replaceChildren(...Object.entries(names).map(([k, label]) => {
+      const l = el('label', 'perm'); const c = el('input'); c.type = 'checkbox'; c.value = k; c.checked = selected.includes(k);
+      l.append(c, el('span', null, label)); return l;
+    }));
+  }
+  const checked = box => [...box.querySelectorAll('input:checked')].map(c => c.value);
+
+  // ---------- Zugänge (Owner) ----------
+  const ROLE_NAME = { owner: 'Owner', coowner: 'Co-Owner' };
+  function showCode(name, code) { $('codeFor').textContent = name; $('codeVal').textContent = code; $('codeBox').hidden = false; }
+  $('codeOk').onclick = () => { $('codeBox').hidden = true; $('codeVal').textContent = ''; };
+  $('codeCopy').onclick = async () => { try { await navigator.clipboard.writeText($('codeVal').textContent); toast('Code kopiert'); } catch { toast('Kopieren nicht möglich – Code markieren', true); } };
+  async function loadUsers() {
+    try {
+      const d = await call('/api/users');
+      permNames = d.permNames;
+      if (!$('newPerms').children.length) permBoxes($('newPerms'), Object.keys(permNames), permNames);
+      $('userRows').replaceChildren(...d.users.map(u => {
+        const tr = el('tr'); const n = el('td'); const nb = el('div', 'fname'); nb.style.cursor = 'default';
+        nb.append(el('span', 'fi dir', u.name[0].toUpperCase()), el('span', null, u.name + (u.id === d.me ? ' (du)' : ''))); n.append(nb);
+        const r = el('td'); r.append(el('span', 'role ' + u.role, u.roleName));
+        const tags = el('div', 'ptags');
+        if (u.role === 'owner') tags.append(el('span', 'ptag', 'alle Rechte'));
+        else if (!u.perms.length) tags.append(el('span', 'ptag', 'nur Status ansehen'));
+        else u.perms.forEach(p => tags.append(el('span', 'ptag', PERM_SHORT[p] || p)));
+        r.append(tags);
+        const acts = el('div', 'acts');
+        const btn = (ic, title, fn, danger) => { const b = el('button', 'ib' + (danger ? ' danger' : '')); b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.append(icon(ic)); b.onclick = fn; acts.append(b); };
+        if (u.role !== 'owner') btn('lock', 'Rechte bearbeiten', () => openPerms(u));
+        btn('refresh', 'Neuen Code erzeugen', async () => { if (!confirm(`Neuen Code für ${u.name}? Der alte Code funktioniert dann nicht mehr.`)) return; try { showCode(u.name, (await post('/api/users/reset', { id: u.id })).code); } catch (err) { toast(err.message, true); } });
+        if (u.id !== d.me) btn('trash', 'Zugang entfernen', async () => { if (!confirm(`Zugang von ${u.name} entfernen? Er wird sofort abgemeldet.`)) return; try { toast((await post('/api/users/delete', { id: u.id })).message); loadUsers(); } catch (err) { toast(err.message, true); } }, true);
+        const t4 = el('td'); t4.append(acts);
+        tr.append(n, r, el('td', 'muted hide-m', u.created ? fmtDate(u.created) : '–'), t4); return tr;
+      }));
+    } catch (err) { toast(err.message, true); }
+  }
+  let permNames = {}, permUser = null;
+  function openPerms(u) { permUser = u; $('permFor').textContent = u.name; permBoxes($('editPerms'), u.perms, permNames); $('permBox').hidden = false; }
+  $('permCancel').onclick = () => { $('permBox').hidden = true; };
+  $('permSave').onclick = async () => { try { toast((await post('/api/users/perms', { id: permUser.id, perms: checked($('editPerms')) })).message); $('permBox').hidden = true; loadUsers(); } catch (err) { toast(err.message, true); } };
+  $('userRole').onchange = () => { $('newPermWrap').hidden = $('userRole').value === 'owner'; };
+
+  $('userForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = $('userName').value.trim(), r = $('userRole').value;
+    if (r === 'owner' && !confirm('Wirklich einen weiteren OWNER erstellen? Owner können auch Zugänge verwalten.')) return;
+    try { const d = await post('/api/users/create', { name, role: r, perms: checked($('newPerms')) }); $('userName').value = ''; showCode(name, d.code); loadUsers(); } catch (err) { toast(err.message, true); }
+  });
+
+  // ---------- Start ----------
+  function showApp() {
+    $('loginView').hidden = true; $('appView').hidden = false;
+    $('meName').textContent = me; $('meAv').textContent = (me[0] || '?').toUpperCase();
+    const applyRole = (r, perms) => { role = r; if (perms) myPerms = new Set(perms); $('meRole').textContent = ROLE_NAME[r] || '–'; $('navUsers').hidden = r !== 'owner'; applyPerms(); };
+    applyRole(role);
+    call('/api/me').then(d => applyRole(d.role, d.perms)).catch(() => {});
+    consolePos = 0; pollStatus(); pollConsole();
+    const h = (location.hash || '').slice(1); go(TITLES[h] && (h !== 'users' || role === 'owner') ? h : 'overview');
+  }
+  setInterval(pollStatus, 3000);
+  setInterval(pollConsole, 2000);
+  discover().then(ok => { if (token && ok) showApp(); });
+})();
+</script>
+</body>
+</html>
