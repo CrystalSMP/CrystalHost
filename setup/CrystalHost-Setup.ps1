@@ -145,10 +145,11 @@ function Read-Props($file) {
 function Set-Props($file, $changes) {
     $lines = if (Test-Path $file) { @(Get-Content $file) } else { @() }
     $seen = @{}
-    $out = foreach ($l in $lines) {
+    # @(...) erzwingt eine Liste - sonst wird bei leerer Datei aus += eine einzige zusammengeklebte Zeile
+    $out = @(foreach ($l in $lines) {
         $k = ($l -split '=', 2)[0]
         if ($l -notmatch '^#' -and $l -match '=' -and $changes.Contains($k)) { "$k=$($changes[$k])"; $seen[$k] = $true } else { $l }
-    }
+    })
     foreach ($k in $changes.Keys) { if (-not $seen[$k]) { $out += "$k=$($changes[$k])" } }
     [IO.File]::WriteAllLines($file, [string[]]$out, (New-Object Text.UTF8Encoding($false)))
 }
@@ -238,7 +239,8 @@ $btnGo.Add_Click({
             $changes["max-players"] = 20; $changes["view-distance"] = 8; $changes["simulation-distance"] = 8
         }
         Set-Props $propsFile $changes
-        if (-not (Select-String -Path (Join-Path $srv "eula.txt") -Pattern 'eula=true' -Quiet -ErrorAction SilentlyContinue)) {
+        $eulaFile = Join-Path $srv "eula.txt"
+        if (-not ((Test-Path $eulaFile) -and (Select-String -Path $eulaFile -Pattern 'eula=true' -Quiet))) {
             Set-Content (Join-Path $srv "eula.txt") "# Akzeptiert im CrystalHost-Setup am $(Get-Date -Format 'dd.MM.yyyy HH:mm')`neula=true" -Encoding ASCII
         }
         $cfg = [ordered]@{
@@ -292,7 +294,8 @@ $btnGo.Add_Click({
 
 if ($AutoTest) {
     $form.Add_Shown({
-        $rbOld.Checked = $true; $tbFolder.Text = $AutoTest; $tbName.Text = "AutoTest"; $cbEula.Checked = $true; $cbAuto.Checked = $false; $numRam.Value = 2
+        if ($AutoTest -eq "neu") { $rbNew.Checked = $true; $tbName.Text = "AutoNeu" } else { $rbOld.Checked = $true; $tbFolder.Text = $AutoTest; $tbName.Text = "AutoTest" }
+        $cbEula.Checked = $true; $cbAuto.Checked = $false; $numRam.Value = 2
         $btnGo.PerformClick()
         "$($sub.Text) | $($lblStep.Text) | $($lblInfo.Text)" | Set-Content (Join-Path $Root "autotest-ergebnis.txt") -Encoding UTF8
         $form.Close()
