@@ -274,6 +274,7 @@
     <p id="localMsg">CrystalHost sucht den Server auf diesem PC. Einen Moment.</p>
     <div id="localActions" hidden style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">
       <button class="btn btn-primary w100" id="retryLocal" type="button">Nochmal suchen</button>
+      <a class="btn w100" id="openLocal" href="http://127.0.0.1:8130/" style="text-align:center">Panel direkt auf diesem PC öffnen</a>
       <a class="btn w100" href="../#so-gehts" style="text-align:center">Noch keinen Server? Setup herunterladen</a>
     </div>
     <details id="codeLogin" style="margin-top:14px">
@@ -552,7 +553,7 @@
     token = null; role = ''; store.clear('ch_token'); store.clear('ch_name'); store.clear('ch_role');
     if (!expired) { store.clear('ch_api'); store.clear('ch_sid'); API = ''; }
     $('appView').hidden = true; $('loginView').hidden = false;
-    if (expired) $('loginErr').textContent = 'Bitte erneut anmelden.';
+    if (expired) { localLogin(); return; } // alte Sitzung abgelaufen -> auf diesem PC einfach neu anmelden
     $('localTitle').textContent = 'Abgemeldet'; $('localMsg').textContent = 'Klick auf „Nochmal suchen“, um wieder in dein Panel zu kommen.'; $('localActions').hidden = false; $('localActions').style.display = 'flex';
   }
   $('logout').onclick = () => logout(false);

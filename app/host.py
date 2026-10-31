@@ -671,15 +671,19 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
 
-    def direct_local(self):
+    def from_this_pc(self):
         """Anfrage kommt vom Browser auf DIESEM PC - nicht ueber den Tunnel (Cloudflare setzt immer Cf-Ray)."""
         return (self.client_address[0] in ("127.0.0.1", "::1") and not self.headers.get("Cf-Ray")
-                and not self.headers.get("CF-Connecting-IP") and self.headers.get("Origin") in ALLOWED_ORIGINS)
+                and not self.headers.get("CF-Connecting-IP"))
+
+    def direct_local(self):
+        # zusaetzlich nur von der CrystalHost-Seite selbst (fremde Websites schicken eine andere Origin)
+        return self.from_this_pc() and self.headers.get("Origin") in ALLOWED_ORIGINS
 
     def do_GET(self):
         path, _, query = self.path.partition("?")
         if path == "/api/ping":
-            return self.reply(200, {"ok": True, "name": CFG.get("name", "Server"), "local": self.direct_local()})
+            return self.reply(200, {"ok": True, "name": CFG.get("name", "Server"), "local": self.from_this_pc()})
         if path in ("/", "/index.html"):
             try:
                 with open(WEB_FILE, "rb") as f:

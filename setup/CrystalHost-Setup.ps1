@@ -253,7 +253,7 @@ $btnGo.Add_Click({
         $starter = Join-Path $base "CrystalHost-Starten.vbs"
         Set-Content $starter "Set sh = CreateObject(`"WScript.Shell`")`r`nsh.CurrentDirectory = `"$base`"`r`nsh.Run `"`"`"$pyw`"`" -I `"`"$base\host.py`"`"`", 0, False" -Encoding ASCII
         $desk = [Environment]::GetFolderPath("Desktop")
-        if (-not $AutoTest) { Set-Content (Join-Path $desk "$name - Panel.url") "[InternetShortcut]`r`nURL=$PANEL_URL" -Encoding ASCII }
+        if (-not $AutoTest) { Set-Content (Join-Path $desk "$name - Panel.url") "[InternetShortcut]`r`nURL=http://127.0.0.1:$($cfg.panelPort)/" -Encoding ASCII }
         if ($cbAuto.Checked) {
             $ws = New-Object -ComObject WScript.Shell
             $s = $ws.CreateShortcut((Join-Path ([Environment]::GetFolderPath("Startup")) "CrystalHost - $folderName.lnk"))
@@ -276,7 +276,8 @@ $btnGo.Add_Click({
         New-Label "3.  Später: Desktop-Verknüpfung '$name - Panel' benutzen." 30 224 500 22 | Out-Null
         New-Label "Freunde oder du von unterwegs brauchen einen Zugangscode – den erstellst du im Panel unter 'Zugänge'. Dein eigener steht in ZUGANG.txt." 30 262 500 44 $fontUi $muted | Out-Null
         $btnPanel = New-Button "Panel öffnen" 30 330 500 $true
-        $btnPanel.Add_Click({ Start-Process $PANEL_URL })
+        $localPanel = "http://127.0.0.1:$($cfg.panelPort)/"
+        $btnPanel.Add_Click({ Start-Process $localPanel }.GetNewClosure())
         $btnClose = New-Button "Fertig" 30 378 500
         $btnClose.Add_Click({ $form.Close() })
     } catch {
